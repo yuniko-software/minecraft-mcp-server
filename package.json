@@ -1,14 +1,15 @@
 {
   "name": "minecraft-mcp-server",
   "version": "1.0.0",
-  "description": "A Minecraft MCP Server",
-  "type": "module",
   "main": "dist/bot.js",
+  "type": "module",
+  "bin": {
+    "minecraft-mcp-server": "dist/bot.js"
+  },
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc",
-    "start": "node dist/bot.js",
-    "dev": "tsc -w",
-    "serve": "npm run build && npm run start"
+    "start": "node dist/bot.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.7.0",
