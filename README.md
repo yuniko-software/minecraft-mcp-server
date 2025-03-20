@@ -1,6 +1,6 @@
 # Minecraft MCP Server
 
-A Minecraft bot powered by large language models. This bot uses the Model Context Protocol (MCP) to enable Claude and other supported models to control a Minecraft character.
+A Minecraft bot powered by large language models and [Mineflayer API](https://github.com/PrismarineJS/mineflayer). This bot uses the [Model Context Protocol](https://github.com/modelcontextprotocol) (MCP) to enable Claude and other supported models to control a Minecraft character.
 
 ## Prerequisites
 
@@ -51,6 +51,8 @@ You can give bot any commands through any active Claude Desktop chat. You can al
 Don't forget to mention that bot should do something in Minecraft in your prompt. Because saying this is a trigger to run MCP server. It will ask for your permissions.
 
 Using Claude 3.7 Sonnet could give you some interesting results. The bot-agent would be really smart 🫡
+
+Example usage: [shared Claude chat](https://claude.ai/share/535d5f69-f102-4cdb-9801-f74ea5709c0b)
 
 ## Available Commands
 
