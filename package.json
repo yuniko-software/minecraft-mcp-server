@@ -1,0 +1,31 @@
+{
+  "name": "minecraft-mcp-server",
+  "version": "1.0.0",
+  "description": "A Minecraft MCP Server",
+  "type": "module",
+  "main": "dist/bot.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/bot.js",
+    "dev": "tsc -w",
+    "serve": "npm run build && npm run start"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "minecraft-data": "^3.45.0",
+    "mineflayer": "^4.8.0",
+    "mineflayer-pathfinder": "^2.4.2",
+    "vec3": "^0.1.8",
+    "yargs": "^17.7.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/vec3": "^0.0.29",
+    "@types/yargs": "^17.0.33",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
