@@ -5,8 +5,8 @@ A Minecraft bot powered by large language models and [Mineflayer API](https://gi
 ## Prerequisites
 
 - Node.js
-- A running Minecraft game
-- Claude Desktop (the setup below was tested with Minecraft 1.21.4 Java Edition included in Microsoft Game Pass)
+- A running Minecraft game (the setup below was tested with Minecraft 1.21.4 Java Edition included in Microsoft Game Pass)
+- Claude Desktop 
 
 ## Getting started
 
