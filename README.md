@@ -4,6 +4,10 @@
 
 A Minecraft bot powered by large language models and [Mineflayer API](https://github.com/PrismarineJS/mineflayer). This bot uses the [Model Context Protocol](https://github.com/modelcontextprotocol) (MCP) to enable Claude and other supported models to control a Minecraft character.
 
+<a href="https://glama.ai/mcp/servers/@yuniko-software/minecraft-mcp-server">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@yuniko-software/minecraft-mcp-server/badge" alt="mcp-minecraft MCP server" />
+</a>
+
 ## Prerequisites
 
 - Node.js
