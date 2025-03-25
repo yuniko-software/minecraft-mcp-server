@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.7.0",
-    "minecraft-data": "^3.45.0",
+    "minecraft-data": "^3.84.1",
     "mineflayer": "^4.27.0",
     "mineflayer-pathfinder": "^2.4.2",
     "vec3": "^0.1.8",
@@ -26,9 +26,9 @@
     "@types/node": "^22.13.13",
     "@types/vec3": "^0.1.4",
     "@types/yargs": "^17.0.33",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "eslint": "^9.23.0",
     "typescript": "^5.8.2"
   },
   "engines": {
