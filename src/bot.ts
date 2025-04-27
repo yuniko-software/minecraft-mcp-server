@@ -90,7 +90,7 @@ function setupBot(argv: any) {
     host: argv.host,
     port: argv.port,
     username: argv.username,
-    plugins: { pathfinder }
+    plugins: { pathfinder },
   };
 
   // Log connection information
@@ -98,6 +98,14 @@ function setupBot(argv: any) {
   
   // Create a bot instance
   const bot = mineflayer.createBot(botOptions);
+  
+  // Load the creative plugin
+  try {
+    require('mineflayer-creative')(mineflayer)(bot);
+    console.error('Creative plugin loaded successfully');
+  } catch (error) {
+    console.error('Failed to load creative plugin:', error);
+  }
   
   // Set up the bot when it spawns
   bot.once('spawn', async () => {
@@ -107,6 +115,28 @@ function setupBot(argv: any) {
     const mcData = minecraftData(bot.version);
     const defaultMove = new Movements(bot, mcData);
     bot.pathfinder.setMovements(defaultMove);
+    
+    // Try to set creative mode abilities
+    try {
+      if (bot.creative) {
+        console.error('Creative mode available, setting up flight capabilities');
+        // Wait a moment for server to register capabilities
+        setTimeout(() => {
+          try {
+            bot.creative.startFlying();
+            console.error('Flight mode initialized');
+            // Stop flying initially
+            setTimeout(() => bot.creative.stopFlying(), 500);
+          } catch (flyError) {
+            console.error('Error initializing flight:', flyError);
+          }
+        }, 1000);
+      } else {
+        console.error('Creative plugin not available');
+      }
+    } catch (creativeError) {
+      console.error('Error setting up creative mode:', creativeError);
+    }
     
     bot.chat('Claude-powered bot ready to receive instructions!');
   });
@@ -142,6 +172,7 @@ function createMcpServer(bot: any) {
   registerBlockTools(server, bot);
   registerEntityTools(server, bot);
   registerChatTools(server, bot);
+  registerFlightTools(server, bot); // Added flight tools
   
   return server;
 }
@@ -539,6 +570,85 @@ function registerChatTools(server: McpServer, bot: any) {
         bot.chat(message);
         return createResponse(`Sent message: "${message}"`);
       } catch (error) {
+        return createErrorResponse(error as Error);
+      }
+    }
+  );
+}
+
+// ========== Flight Tools ==========
+
+function registerFlightTools(server: McpServer, bot: any) {
+  server.tool(
+    "enable-flight",
+    "Enable flight mode for the bot",
+    {},
+    async (): Promise<McpResponse> => {
+      try {
+        if (!bot.creative) {
+          return createResponse("Creative mode is not available. Cannot enable flight.");
+        }
+        
+        bot.creative.startFlying();
+        console.error('Flight mode activated');
+        return createResponse("Flight mode enabled. The bot is now flying.");
+      } catch (error) {
+        console.error('Error enabling flight:', error);
+        return createErrorResponse(error as Error);
+      }
+    }
+  );
+
+  server.tool(
+    "disable-flight",
+    "Disable flight mode for the bot",
+    {},
+    async (): Promise<McpResponse> => {
+      try {
+        if (!bot.creative) {
+          return createResponse("Creative mode is not available. Cannot disable flight.");
+        }
+        
+        bot.creative.stopFlying();
+        console.error('Flight mode deactivated');
+        return createResponse("Flight mode disabled. The bot is no longer flying.");
+      } catch (error) {
+        console.error('Error disabling flight:', error);
+        return createErrorResponse(error as Error);
+      }
+    }
+  );
+
+  server.tool(
+    "fly-to",
+    "Make the bot fly to a specific position",
+    {
+      x: z.number().describe("X coordinate"),
+      y: z.number().describe("Y coordinate"),
+      z: z.number().describe("Z coordinate")
+    },
+    async ({ x, y, z }): Promise<McpResponse> => {
+      try {
+        if (!bot.creative) {
+          return createResponse("Creative mode is not available. Cannot fly.");
+        }
+        
+        // Get current position for logging
+        const currentPos = bot.entity.position.clone();
+        console.error(`Current position: (${Math.floor(currentPos.x)}, ${Math.floor(currentPos.y)}, ${Math.floor(currentPos.z)})`);
+        console.error(`Flying to: (${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)})`);
+        
+        // Use the flyTo method which handles flying properly
+        const destination = new Vec3(x, y, z);
+        try {
+          await bot.creative.flyTo(destination);
+          return createResponse(`Flew to position (${x}, ${y}, ${z}).`);
+        } catch (flyError) {
+          console.error('Error in flyTo:', flyError);
+          return createErrorResponse(`Failed to fly to position: ${(flyError as Error).message}`);
+        }
+      } catch (error) {
+        console.error('Error in fly-to command:', error);
         return createErrorResponse(error as Error);
       }
     }
