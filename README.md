@@ -76,6 +76,11 @@ Once connected to a Minecraft server, Claude can use these commands:
 - `jump` - Make the bot jump
 - `move-in-direction` - Move in a specific direction for a duration
 
+### Flight
+- `enable-flight` - Enable flight mode for the bot (requires creative mode)
+- `disable-flight` - Disable flight mode for the bot
+- `fly-to` - Make the bot fly directly to specific coordinates
+
 ### Inventory
 - `list-inventory` - List all items in the bot's inventory
 - `find-item` - Find a specific item in inventory
