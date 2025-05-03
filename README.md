@@ -1,5 +1,7 @@
 # Minecraft MCP Server
 
+https://github.com/user-attachments/assets/6f17f329-3991-4bc7-badd-7cde9aacb92f
+
 > ⚠️ **IMPORTANT COMPATIBILITY WARNING**: As of March 25, 2025, Minecraft 1.21.5 was just released. This bot is currently **NOT compatible** with Minecraft 1.21.5. Please use Minecraft 1.21.4 until we release an update with 1.21.5 support.
 
 A Minecraft bot powered by large language models and [Mineflayer API](https://github.com/PrismarineJS/mineflayer). This bot uses the [Model Context Protocol](https://github.com/modelcontextprotocol) (MCP) to enable Claude and other supported models to control a Minecraft character.
@@ -10,6 +12,7 @@ A Minecraft bot powered by large language models and [Mineflayer API](https://gi
 
 ## Prerequisites
 
+- Git
 - Node.js
 - A running Minecraft game (the setup below was tested with Minecraft 1.21.4 Java Edition included in Microsoft Game Pass)
 - Claude Desktop 
