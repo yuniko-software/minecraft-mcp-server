@@ -80,8 +80,6 @@ Once connected to a Minecraft server, Claude can use these commands:
 - `move-in-direction` - Move in a specific direction for a duration
 
 ### Flight
-- `enable-flight` - Enable flight mode for the bot (requires creative mode)
-- `disable-flight` - Disable flight mode for the bot
 - `fly-to` - Make the bot fly directly to specific coordinates
 
 ### Inventory
