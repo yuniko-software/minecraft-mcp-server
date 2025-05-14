@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/yuniko-software-minecraft-mcp-server-badge.png)](https://mseep.ai/app/yuniko-software-minecraft-mcp-server)
+
 # Minecraft MCP Server
 
 > ⚠️ **IMPORTANT COMPATIBILITY WARNING**: As of March 25, 2025, Minecraft 1.21.5 was just released. This bot is currently **NOT compatible** with Minecraft 1.21.5. Please use Minecraft 1.21.4 until we release an update with 1.21.5 support.
