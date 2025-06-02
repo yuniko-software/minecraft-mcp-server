@@ -20,7 +20,7 @@
     "mineflayer-pathfinder": "^2.4.2",
     "vec3": "^0.1.8",
     "yargs": "^17.7.2",
-    "zod": "^3.25.28"
+    "zod": "^3.25.46"
   },
   "devDependencies": {
     "@types/node": "^22.15.24",
