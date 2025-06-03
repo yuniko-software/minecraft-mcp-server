@@ -15,7 +15,7 @@ const config: Config = {
         }],
     ],
     moduleNameMapper: pathsToModuleNameMapper(
-        { '@minecraft-mcp-server/*': ['src/*'] },
+        { '@/src/*': ['src/*'] },
         { prefix: '<rootDir>/' },
     ),
 };
