@@ -633,7 +633,7 @@ function createCancellableFlightOperation(
 function registerPropertyTools(server: McpServer, bot: any) {
   server.tool(
     "detect-gamemode",
-    "Detect the gamemode on your game",
+    "Detect the gamemode on game",
     async (): Promise<McpResponse> => {
       try {
         return createResponse(`Bot gamemode: "${bot.game.gameMode}"`);
