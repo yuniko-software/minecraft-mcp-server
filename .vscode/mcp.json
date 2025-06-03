@@ -1,0 +1,18 @@
+{
+  "servers": {
+    "minecraft": {
+      "command": "node",
+      "args": [
+        "--inspect=0.0.0.0:9229",
+        "-r",
+        "dotenv/config",
+        "-r",
+        "tsconfig-paths/register",
+        "-r",
+        "ts-node/register",
+        "index.ts"
+      ],
+      "envFile": "${workspaceFolder}/.env"
+    }
+  }
+}

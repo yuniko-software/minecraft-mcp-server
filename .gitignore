@@ -1,0 +1,46 @@
+# Dist folder
+dist/
+
+# Node.js dependencies
+node_modules/
+
+# Log files
+logs/
+*.log
+npm-debug.log*
+
+# Process IDs
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# NPM cache
+.npm/
+
+# REPL history
+.node_repl_history
+
+# Coverage
+coverage/
+
+# Test results
+test-results.xml
+
+# Environment variables
+.env*
+!.env.example
+
+# npm cache and authentication
+.npm/
+.npmrc.local
+node_modules/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Modules

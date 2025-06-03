@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach",
+      "port": 9229,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    },
+    {
+      "name": "Launch",
+      "type": "node",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "node",
+      "args": [
+        "--inspect=0.0.0.0:9229",
+        "-r",
+        "dotenv/config",
+        "-r",
+        "ts-node/register",
+        "index.ts"
+      ],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  ]
+}

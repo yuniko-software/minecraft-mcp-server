@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run build"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {},
+        "shell": {
+          "executable": "bash",
+          "args": ["-c"]
+        }
+      }
+    }
+  ]
+}
