@@ -143,7 +143,7 @@ function createMcpServer(bot: any) {
   registerEntityTools(server, bot);
   registerChatTools(server, bot);
   registerFlightTools(server, bot);
-  registerPropertyTools(server,bot);
+  registerGameStateTools(server, bot);
 
   return server;
 }
@@ -628,19 +628,20 @@ function createCancellableFlightOperation(
   });
 }
 
-// ========== Property Tools ============
+// ========== Game State Tools ============
 
-function registerPropertyTools(server: McpServer, bot: any) {
+function registerGameStateTools(server: McpServer, bot: any) {
   server.tool(
     "detect-gamemode",
     "Detect the gamemode on game",
+    {},
     async (): Promise<McpResponse> => {
       try {
         return createResponse(`Bot gamemode: "${bot.game.gameMode}"`);
       } catch (error) {
         return createErrorResponse(error as Error);
       }
-    },
+    }
   );
 }
 
