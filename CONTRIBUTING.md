@@ -1,39 +1,60 @@
-# Welcome to Minecraft-MCP-Server contributing guide
+# Welcome to Minecraft-MCP-Server Contributing Guide
 
 ## Prerequisites
 - Git
 - Node.js (>=16.0.0)
-- A running Minecraft game (the setup below was tested with Minecraft 1.21.4 Java Edition included in Microsoft Game Pass)
-- Claude Desktop
+- A running Minecraft game (tested with Minecraft 1.21.4 Java Edition)
+- Claude Desktop (or another MCP-compatible client)
 
-## Getting Started
-This bot is designed to be used with Claude Desktop through the Model Context Protocol (MCP).
+### 1. Fork and Clone the Repository
 
-### 1. Setup Minecraft Server
-Create a singleplayer world and open it to LAN (ESC -> Open to LAN). Bot will try to connect using port 25565 and hostname localhost. These parameters could be configured in claude_desktop_config.json on a next step.
+1. Fork this repository on GitHub
+2. Clone your fork locally:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/minecraft-mcp-server.git
+   cd minecraft-mcp-server
+   ```
 
-### 2. MCP Configuration
+### 2. Create a Feature Branch
 
-Make sure that [Claude Desktop](https://claude.ai/download) is installed. 
+Create a new branch for your feature or bug fix:
+```bash
+git checkout -b your-feature-name
+```
 
-You can open your desktop config file via Claude Desktop by clicking `File -> Settings -> Developer -> Edit Config`.
+### 3. Setup Minecraft Server
 
-You can also open your Claude for Desktop App configuration via text editor by typing in the command line:
+Create a singleplayer world and open it to LAN (ESC -> Open to LAN). The bot will connect using port 25565 and hostname localhost by default.
+
+For a more detailed setup guide, see the [README](README.md).
+
+### 4. Configure Your MCP Client
+
+#### For Claude Desktop Users
+
+Make sure [Claude Desktop](https://claude.ai/download) is installed. Open your desktop config file via Claude Desktop: `File -> Settings -> Developer -> Edit Config`
+
+Alternatively, you can edit the config file directly:
 
 **MacOS/Linux**
-```
+```bash
 code ~/Library/Application\ Support/Claude/claude_desktop_config.json
 ```
 
 **Windows**
-```
+```bash
 code $env:AppData\Claude\claude_desktop_config.json
 ```
 
-Update your `claude_desktop_config.json` by adding the minecraft mcp server in the mcpServers key, or adding if there is none. For this project, you can copy and paste the following code:
+#### For Other MCP Clients
 
-If you're running from this github repository, you can add this:
+If you're using a different MCP client, configure it according to your client's documentation to point to the npx command and arguments shown below.
 
+### 5. Point Your Client to Your Development Branch
+
+Update your MCP configuration to use your fork and branch:
+
+**For Claude Desktop (`claude_desktop_config.json`):**
 ```json
 {
   "mcpServers": {
@@ -41,7 +62,7 @@ If you're running from this github repository, you can add this:
       "command": "npx",
       "args": [
         "-y",
-        "github:yuniko-software/minecraft-mcp-server",
+        "github:YOUR_USERNAME/minecraft-mcp-server#your-feature-branch-name",
         "--host",
         "localhost",
         "--port",
@@ -54,55 +75,20 @@ If you're running from this github repository, you can add this:
 }
 ```
 
-If you're running from your local repository:
+### 6. Development Workflow
 
-Install npm dependecies
-```
-npm install
-```
+1. Make your changes and commit them to your feature branch
+2. Push your branch to your fork:
+   ```bash
+   git push origin your-feature-name
+   ```
+3. Restart your MCP client completely (for Claude Desktop, close from system tray)
+4. Open your MCP client - it will automatically pull and run your latest changes
+5. Test your changes through your client's chat interface
 
-Build the Typescript
-```
-npm run build
-```
+## Submitting Changes
 
-There should be an javascript file in `dist/` called `bot.js`. 
-
-You can have Claude run this multiple ways.
-
-#### Running with npx
-Help needed
-
-
-#### Running with nvm
-There is an [ongoing issue](https://github.com/modelcontextprotocol/servers/issues/64) with MCP servers and Node Version Manager, where Claude seems to use an incompatible version when hosting this codebase.
-
-To bypass this, you can run this command and use the specified path for the command field.
-```
-which node
-```
-
-Be sure to copy and paste the path of `/dist/bot.js`.
-
-```json
-{
-  "mcpServers": {
-    "minecraft": {
-      "command": "/Users/[username]/.nvm/versions/node/v23.3.0/bin/node",
-      "args": [
-        "/PATH/TO/YOUR/FORKED/REPOSITORY/dist/bot.js",
-        "--host",
-        "localhost",
-        "--port",
-        "25565",
-        "--username",
-        "ClaudeBot"
-      ]
-    }
-  }
-}
-```
-
-Double-check that right `--port` and `--host` parameters were used. Make sure to completely reboot the Claude Desktop application (should be closed in OS tray).
-
-Once you open Claude, the MCP server should start automatically and your bot should connect to the configured Minecraft server (if it's running). You'll then be able to control the bot through Claude's chat interface.
+Once you're happy with your changes:
+1. Push your feature branch to your fork
+2. Create a Pull Request from your fork to the main repository
+3. Others can test your changes by pointing their config to your fork/branch
