@@ -110,4 +110,4 @@ Feel free to submit pull requests or open issues for improvements. Some areas th
 - Tests for different components
 - New functionality and commands
 
-To get started with contributing, please see [CONTRIBUTING.md](https://github.com/yuniko-software/minecraft-mcp-server/blob/main/CONTRIBUTING.md).
+To get started with contributing, please see [CONTRIBUTING.md](CONTRIBUTING.md).
