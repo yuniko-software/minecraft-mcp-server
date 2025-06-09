@@ -23,7 +23,7 @@
     "zod": "^3.25.28"
   },
   "devDependencies": {
-    "@types/node": "^22.15.24",
+    "@types/node": "^22.15.30",
     "@types/vec3": "^0.1.4",
     "@types/yargs": "^17.0.33",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
