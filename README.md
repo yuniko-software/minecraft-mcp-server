@@ -99,6 +99,9 @@ Once connected to a Minecraft server, Claude can use these commands:
 ### Communication
 - `send-chat` - Send a chat message in-game
 
+### Game State
+- `detect-gamemode` - Detect the gamemode on game
+
 ## Contributing
 
 This application was made in just two days, and the code is really simple and straightforward. All refactoring commits, functional and test contributions, issues and discussion are greatly appreciated!
