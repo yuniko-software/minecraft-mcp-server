@@ -15,7 +15,7 @@ A Minecraft bot powered by large language models and [Mineflayer API](https://gi
 - Git
 - Node.js
 - A running Minecraft game (the setup below was tested with Minecraft 1.21.4 Java Edition included in Microsoft Game Pass)
-- Claude Desktop 
+- An MCP-compatible client. Claude Desktop will be used as an example, but other MCP clients are also supported
 
 ## Getting started
 
@@ -64,7 +64,7 @@ You can give bot any commands through any active Claude Desktop chat. You can al
 
 Don't forget to mention that bot should do something in Minecraft in your prompt. Because saying this is a trigger to run MCP server. It will ask for your permissions.
 
-Using Claude 3.7 Sonnet could give you some interesting results. The bot-agent would be really smart 🫡
+Using Claude 4.0 Sonnet could give you some interesting results. The bot-agent would be really smart 🫡
 
 Example usage: [shared Claude chat](https://claude.ai/share/535d5f69-f102-4cdb-9801-f74ea5709c0b)
 
