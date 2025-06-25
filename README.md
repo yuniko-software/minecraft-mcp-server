@@ -55,10 +55,9 @@ Double-check that right `--port` and `--host` parameters were used. Make sure to
 
 Make sure Minecraft game is running and the world is opened to LAN. Then start Claude Desktop application and the bot should join the game. 
 
-It could take some time for Claude Desktop to boot the MCP server. The marker that the server has booted successfully is a hammer icon that appears next to the chat.
+It could take some time for Claude Desktop to boot the MCP server. The marker that the server has booted successfully:
 
-![image](https://github.com/user-attachments/assets/1040c6a5-0d61-41d9-99e3-539026886392)
-
+![image](https://github.com/user-attachments/assets/39211d34-c3b3-46d6-bc80-353fd4fba690)
 
 You can give bot any commands through any active Claude Desktop chat. You can also upload images of buildings and ask bot to build them 😁
 
