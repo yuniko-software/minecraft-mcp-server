@@ -180,8 +180,9 @@ function registerPositionTools(server: McpServer, bot: any) {
       z: z.number().describe("Z coordinate"),
       range: z.number().optional().describe("How close to get to the target (default: 1)")
     },
-    async ({ x, y, z, range = 1 }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { x, y, z, range = 1 } = args;
         const goal = new goals.GoalNear(x, y, z, range);
         await bot.pathfinder.goto(goal);
 
@@ -200,8 +201,9 @@ function registerPositionTools(server: McpServer, bot: any) {
       y: z.number().describe("Y coordinate"),
       z: z.number().describe("Z coordinate"),
     },
-    async ({ x, y, z }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { x, y, z } = args;
         await bot.lookAt(new Vec3(x, y, z), true);
 
         return createResponse(`Looking at position (${x}, ${y}, ${z})`);
@@ -234,9 +236,10 @@ function registerPositionTools(server: McpServer, bot: any) {
       direction: z.enum(['forward', 'back', 'left', 'right']).describe("Direction to move"),
       duration: z.number().optional().describe("Duration in milliseconds (default: 1000)")
     },
-    async ({ direction, duration = 1000 }: { direction: Direction, duration?: number }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       return new Promise((resolve) => {
         try {
+          const { direction, duration = 1000 } = args;
           bot.setControlState(direction, true);
 
           setTimeout(() => {
@@ -244,6 +247,7 @@ function registerPositionTools(server: McpServer, bot: any) {
             resolve(createResponse(`Moved ${direction} for ${duration}ms`));
           }, duration);
         } catch (error) {
+          const { direction } = args;
           bot.setControlState(direction, false);
           resolve(createErrorResponse(error as Error));
         }
@@ -290,8 +294,9 @@ function registerInventoryTools(server: McpServer, bot: any) {
     {
       nameOrType: z.string().describe("Name or type of item to find")
     },
-    async ({ nameOrType }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { nameOrType } = args;
         const items = bot.inventory.items();
         const item = items.find((item: any) =>
           item.name.includes(nameOrType.toLowerCase())
@@ -315,8 +320,9 @@ function registerInventoryTools(server: McpServer, bot: any) {
       itemName: z.string().describe("Name of the item to equip"),
       destination: z.string().optional().describe("Where to equip the item (default: 'hand')")
     },
-    async ({ itemName, destination = 'hand' }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { itemName, destination = 'hand' } = args;
         const items = bot.inventory.items();
         const item = items.find((item: any) =>
           item.name.includes(itemName.toLowerCase())
@@ -347,8 +353,9 @@ function registerBlockTools(server: McpServer, bot: any) {
       z: z.number().describe("Z coordinate"),
       faceDirection: z.enum(['up', 'down', 'north', 'south', 'east', 'west']).optional().describe("Direction to place against (default: 'down')")
     },
-    async ({ x, y, z, faceDirection = 'down' }: { x: number, y: number, z: number, faceDirection?: FaceDirection }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { x, y, z, faceDirection = 'down' } = args;
         const placePos = new Vec3(x, y, z);
         const blockAtPos = bot.blockAt(placePos);
         if (blockAtPos && blockAtPos.name !== 'air') {
@@ -411,8 +418,9 @@ function registerBlockTools(server: McpServer, bot: any) {
       y: z.number().describe("Y coordinate"),
       z: z.number().describe("Z coordinate"),
     },
-    async ({ x, y, z }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { x, y, z } = args;
         const blockPos = new Vec3(x, y, z);
         const block = bot.blockAt(blockPos);
 
@@ -443,8 +451,9 @@ function registerBlockTools(server: McpServer, bot: any) {
       y: z.number().describe("Y coordinate"),
       z: z.number().describe("Z coordinate"),
     },
-    async ({ x, y, z }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { x, y, z } = args;
         const blockPos = new Vec3(x, y, z);
         const block = bot.blockAt(blockPos);
 
@@ -466,8 +475,9 @@ function registerBlockTools(server: McpServer, bot: any) {
       blockType: z.string().describe("Type of block to find"),
       maxDistance: z.number().optional().describe("Maximum search distance (default: 16)")
     },
-    async ({ blockType, maxDistance = 16 }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { blockType, maxDistance = 16 } = args;
         const mcData = minecraftData(bot.version);
         const blocksByName = mcData.blocksByName;
 
@@ -504,8 +514,9 @@ function registerEntityTools(server: McpServer, bot: any) {
       type: z.string().optional().describe("Type of entity to find (empty for any entity)"),
       maxDistance: z.number().optional().describe("Maximum search distance (default: 16)")
     },
-    async ({ type = '', maxDistance = 16 }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { type = '', maxDistance = 16 } = args;
         const entityFilter = (entity: any) => {
           if (!type) return true;
           if (type === 'player') return entity.type === 'player';
@@ -536,8 +547,9 @@ function registerChatTools(server: McpServer, bot: any) {
     {
       message: z.string().describe("Message to send in chat")
     },
-    async ({ message }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
       try {
+        const { message } = args;
         bot.chat(message);
         return createResponse(`Sent message: "${message}"`);
       } catch (error) {
@@ -558,7 +570,9 @@ function registerFlightTools(server: McpServer, bot: any) {
       y: z.number().describe("Y coordinate"),
       z: z.number().describe("Z coordinate")
     },
-    async ({ x, y, z }): Promise<McpResponse> => {
+    async (args): Promise<McpResponse> => {
+      const { x, y, z } = args;
+      
       if (!bot.creative) {
         return createResponse("Creative mode is not available. Cannot fly.");
       }
