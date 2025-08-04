@@ -1,6 +1,6 @@
 # Minecraft MCP Server
 
-> ⚠️ **IMPORTANT COMPATIBILITY WARNING**: As of March 25, 2025, Minecraft 1.21.5 was just released. This bot is currently **NOT compatible** with Minecraft 1.21.5. Please use Minecraft 1.21.4 until we release an update with 1.21.5 support.
+> ⚠️ **IMPORTANT COMPATIBILITY WARNING**: This bot is currently compatible with Minecraft 1.21.5. Please use Minecraft 1.21.5 or lower versions. Higher versions (1.21.6+) are not supported yet until we release future updates.
 
 https://github.com/user-attachments/assets/6f17f329-3991-4bc7-badd-7cde9aacb92f
 
@@ -14,7 +14,7 @@ A Minecraft bot powered by large language models and [Mineflayer API](https://gi
 
 - Git
 - Node.js
-- A running Minecraft game (the setup below was tested with Minecraft 1.21.4 Java Edition included in Microsoft Game Pass)
+- A running Minecraft game (the setup below was tested with Minecraft 1.21.5 Java Edition included in Microsoft Game Pass)
 - An MCP-compatible client. Claude Desktop will be used as an example, but other MCP clients are also supported
 
 ## Getting started
