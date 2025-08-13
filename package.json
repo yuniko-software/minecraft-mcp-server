@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.1",
-    "minecraft-data": "^3.94.0",
+    "minecraft-data": "^3.95.1",
     "mineflayer": "^4.31.0",
     "mineflayer-pathfinder": "^2.4.2",
     "vec3": "^0.1.8",
