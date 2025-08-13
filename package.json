@@ -27,7 +27,7 @@
     "@types/vec3": "^0.1.4",
     "@types/yargs": "^17.0.33",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
-    "@typescript-eslint/parser": "^8.38.0",
+    "@typescript-eslint/parser": "^8.39.1",
     "eslint": "^9.33.0",
     "typescript": "^5.8.3"
   },
