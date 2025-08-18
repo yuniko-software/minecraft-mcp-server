@@ -118,11 +118,11 @@ function setupBot(argv: any) {
   });
 
   bot.on('kicked', (reason) => {
-    console.error(`Bot was kicked: ${reason}`);
+    console.error(`Bot was kicked: ${JSON.stringify(reason)}`);
   });
 
   bot.on('error', (err) => {
-    console.error(`Bot error: ${err.message}`);
+    console.error(`Bot error: ${JSON.stringify(err)}`);
   });
 
   return bot;
@@ -674,7 +674,7 @@ async function main() {
     await server.connect(transport);
     console.error("Minecraft MCP Server running on stdio");
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error("Failed to start server:", JSON.stringify(error));
     if (bot) bot.quit();
     process.exit(1);
   }
@@ -682,6 +682,6 @@ async function main() {
 
 // Start the application
 main().catch((error) => {
-  console.error("Fatal error in main():", error);
+  console.error("Fatal error in main():", JSON.stringify(error));
   process.exit(1);
 });
