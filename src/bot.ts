@@ -674,7 +674,11 @@ async function main() {
     await server.connect(transport);
     console.error("Minecraft MCP Server running on stdio");
   } catch (error) {
-    console.error("Failed to start server:", JSON.stringify(error));
+    if (error instanceof Error) {
+      console.error("Failed to start server:", error.message, error.stack);
+    } else {
+      console.error("Failed to start server:", JSON.stringify(error));
+    }
     if (bot) bot.quit();
     process.exit(1);
   }
