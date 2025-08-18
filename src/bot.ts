@@ -73,7 +73,7 @@ function createResponse(text: string): McpResponse {
   };
 }
 
-function createErrorResponse(error: unknown): McpResponse {
+function createErrorResponse(error: Error | string): McpResponse {
   const errorMessage = formatErrorForLogging(error);
   console.error(`Error: ${errorMessage}`);
   return {
