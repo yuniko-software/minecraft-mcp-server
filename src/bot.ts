@@ -177,7 +177,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
         return createResponse(`Current position: (${pos.x}, ${pos.y}, ${pos.z})`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -198,7 +198,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
         return createResponse(`Successfully moved to position near (${x}, ${y}, ${z})`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -217,7 +217,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
         return createResponse(`Looking at position (${x}, ${y}, ${z})`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -233,7 +233,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
         return createResponse("Successfully jumped");
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -256,7 +256,7 @@ function registerPositionTools(server: McpServer, bot: any) {
           }, duration);
         } catch (error) {
           bot.setControlState(direction, false);
-          resolve(createErrorResponse(error));
+          resolve(createErrorResponse(error as Error));
         }
       });
     }
@@ -290,7 +290,7 @@ function registerInventoryTools(server: McpServer, bot: any) {
 
         return createResponse(inventoryText);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -314,7 +314,7 @@ function registerInventoryTools(server: McpServer, bot: any) {
           return createResponse(`Couldn't find any item matching '${nameOrType}' in inventory`);
         }
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -340,7 +340,7 @@ function registerInventoryTools(server: McpServer, bot: any) {
         await bot.equip(item, destination as mineflayer.EquipmentDestination);
         return createResponse(`Equipped ${item.name} to ${destination}`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -409,7 +409,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
         return createResponse(`Failed to place block at (${x}, ${y}, ${z}): No suitable reference block found`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -441,7 +441,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
         return createResponse(`Dug ${block.name} at (${x}, ${y}, ${z})`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -465,7 +465,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
         return createResponse(`Found ${block.name} (type: ${block.type}) at position (${block.position.x}, ${block.position.y}, ${block.position.z})`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -499,7 +499,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
         return createResponse(`Found ${blockType} at position (${block.position.x}, ${block.position.y}, ${block.position.z})`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -532,7 +532,7 @@ function registerEntityTools(server: McpServer, bot: any) {
 
         return createResponse(`Found ${entity.name || (entity as any).username || entity.type} at position (${Math.floor(entity.position.x)}, ${Math.floor(entity.position.y)}, ${Math.floor(entity.position.z)})`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -552,7 +552,7 @@ function registerChatTools(server: McpServer, bot: any) {
         bot.chat(message);
         return createResponse(`Sent message: "${message}"`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
@@ -602,7 +602,7 @@ function registerFlightTools(server: McpServer, bot: any) {
         }
 
         console.error(`Flight error: ${formatErrorForLogging(error)}`);
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       } finally {
         clearTimeout(timeoutId);
         bot.creative.stopFlying();
@@ -650,7 +650,7 @@ function registerGameStateTools(server: McpServer, bot: any) {
       try {
         return createResponse(`Bot gamemode: "${bot.game.gameMode}"`);
       } catch (error) {
-        return createErrorResponse(error);
+        return createErrorResponse(error as Error);
       }
     }
   );
