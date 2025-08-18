@@ -682,6 +682,10 @@ async function main() {
 
 // Start the application
 main().catch((error) => {
-  console.error("Fatal error in main():", JSON.stringify(error));
+  if (error instanceof Error) {
+    console.error("Fatal error in main():", error.message, "\n", error.stack);
+  } else {
+    console.error("Fatal error in main():", JSON.stringify(error));
+  }
   process.exit(1);
 });
