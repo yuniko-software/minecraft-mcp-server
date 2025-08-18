@@ -122,7 +122,7 @@ function setupBot(argv: any) {
   });
 
   bot.on('error', (err) => {
-    console.error(`Bot error: ${JSON.stringify(err)}`);
+    console.error(`Bot error: ${err && err.stack ? err.stack : err && err.message ? err.message : err}`);
   });
 
   return bot;
