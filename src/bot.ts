@@ -73,13 +73,23 @@ function createResponse(text: string): McpResponse {
   };
 }
 
-function createErrorResponse(error: Error | string): McpResponse {
-  const errorMessage = typeof error === 'string' ? error : error.message;
+function createErrorResponse(error: unknown): McpResponse {
+  const errorMessage = formatErrorForLogging(error);
   console.error(`Error: ${errorMessage}`);
   return {
     content: [{ type: "text", text: `Failed: ${errorMessage}` }],
     isError: true
   };
+}
+
+function formatErrorForLogging(error: unknown): string {
+  if (error instanceof Error) {
+    return error.stack || error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return JSON.stringify(error);
 }
 
 // ========== Bot Setup ==========
@@ -118,11 +128,11 @@ function setupBot(argv: any) {
   });
 
   bot.on('kicked', (reason) => {
-    console.error(`Bot was kicked: ${JSON.stringify(reason)}`);
+    console.error(`Bot was kicked: ${formatErrorForLogging(reason)}`);
   });
 
   bot.on('error', (err) => {
-    console.error(`Bot error: ${err && err.stack ? err.stack : err && err.message ? err.message : err}`);
+    console.error(`Bot error: ${formatErrorForLogging(err)}`);
   });
 
   return bot;
@@ -166,7 +176,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
         return createResponse(`Current position: (${pos.x}, ${pos.y}, ${pos.z})`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -187,7 +197,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
         return createResponse(`Successfully moved to position near (${x}, ${y}, ${z})`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -206,7 +216,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
         return createResponse(`Looking at position (${x}, ${y}, ${z})`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -222,7 +232,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
         return createResponse("Successfully jumped");
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -245,7 +255,7 @@ function registerPositionTools(server: McpServer, bot: any) {
           }, duration);
         } catch (error) {
           bot.setControlState(direction, false);
-          resolve(createErrorResponse(error as Error));
+          resolve(createErrorResponse(error));
         }
       });
     }
@@ -279,7 +289,7 @@ function registerInventoryTools(server: McpServer, bot: any) {
 
         return createResponse(inventoryText);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -303,7 +313,7 @@ function registerInventoryTools(server: McpServer, bot: any) {
           return createResponse(`Couldn't find any item matching '${nameOrType}' in inventory`);
         }
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -329,7 +339,7 @@ function registerInventoryTools(server: McpServer, bot: any) {
         await bot.equip(item, destination as mineflayer.EquipmentDestination);
         return createResponse(`Equipped ${item.name} to ${destination}`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -390,7 +400,7 @@ function registerBlockTools(server: McpServer, bot: any) {
               await bot.placeBlock(referenceBlock, face.vector.scaled(-1));
               return createResponse(`Placed block at (${x}, ${y}, ${z}) using ${face.direction} face`);
             } catch (placeError) {
-              console.error(`Failed to place using ${face.direction} face: ${(placeError as Error).message}`);
+              console.error(`Failed to place using ${face.direction} face: ${formatErrorForLogging(placeError)}`);
               continue;
             }
           }
@@ -398,7 +408,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
         return createResponse(`Failed to place block at (${x}, ${y}, ${z}): No suitable reference block found`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -430,7 +440,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
         return createResponse(`Dug ${block.name} at (${x}, ${y}, ${z})`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -454,7 +464,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
         return createResponse(`Found ${block.name} (type: ${block.type}) at position (${block.position.x}, ${block.position.y}, ${block.position.z})`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -488,7 +498,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
         return createResponse(`Found ${blockType} at position (${block.position.x}, ${block.position.y}, ${block.position.z})`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -521,7 +531,7 @@ function registerEntityTools(server: McpServer, bot: any) {
 
         return createResponse(`Found ${entity.name || (entity as any).username || entity.type} at position (${Math.floor(entity.position.x)}, ${Math.floor(entity.position.y)}, ${Math.floor(entity.position.z)})`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -541,7 +551,7 @@ function registerChatTools(server: McpServer, bot: any) {
         bot.chat(message);
         return createResponse(`Sent message: "${message}"`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -590,8 +600,8 @@ function registerFlightTools(server: McpServer, bot: any) {
           );
         }
         
-        console.error('Flight error:', error);
-        return createErrorResponse(error as Error);
+        console.error(`Flight error: ${formatErrorForLogging(error)}`);
+        return createErrorResponse(error);
       } finally {
         clearTimeout(timeoutId);
         bot.creative.stopFlying();
@@ -639,7 +649,7 @@ function registerGameStateTools(server: McpServer, bot: any) {
       try {
         return createResponse(`Bot gamemode: "${bot.game.gameMode}"`);
       } catch (error) {
-        return createErrorResponse(error as Error);
+        return createErrorResponse(error);
       }
     }
   );
@@ -674,11 +684,7 @@ async function main() {
     await server.connect(transport);
     console.error("Minecraft MCP Server running on stdio");
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Failed to start server:", error.message, error.stack);
-    } else {
-      console.error("Failed to start server:", JSON.stringify(error));
-    }
+    console.error(`Failed to start server: ${formatErrorForLogging(error)}`);
     if (bot) bot.quit();
     process.exit(1);
   }
@@ -686,10 +692,6 @@ async function main() {
 
 // Start the application
 main().catch((error) => {
-  if (error instanceof Error) {
-    console.error("Fatal error in main():", error.message, "\n", error.stack);
-  } else {
-    console.error("Fatal error in main():", JSON.stringify(error));
-  }
+  console.error(`Fatal error in main(): ${formatErrorForLogging(error)}`);
   process.exit(1);
 });
