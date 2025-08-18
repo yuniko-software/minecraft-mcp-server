@@ -86,10 +86,11 @@ function formatErrorForLogging(error: unknown): string {
   if (error instanceof Error) {
     return error.stack || error.message;
   }
-  if (typeof error === 'string') {
-    return error;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
   }
-  return JSON.stringify(error);
 }
 
 // ========== Bot Setup ==========
@@ -572,22 +573,22 @@ function registerFlightTools(server: McpServer, bot: any) {
       if (!bot.creative) {
         return createResponse("Creative mode is not available. Cannot fly.");
       }
-      
+
       const currentPos = bot.entity.position;
       console.error(`Flying from (${Math.floor(currentPos.x)}, ${Math.floor(currentPos.y)}, ${Math.floor(currentPos.z)}) to (${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)})`);
-  
+
       const controller = new AbortController();
       const FLIGHT_TIMEOUT_MS = 20000;
-      
+
       const timeoutId = setTimeout(() => {
         if (!controller.signal.aborted) {
           controller.abort();
         }
       }, FLIGHT_TIMEOUT_MS);
-      
+
       try {
         const destination = new Vec3(x, y, z);
-        
+
         await createCancellableFlightOperation(bot, destination, controller);
 
         return createResponse(`Successfully flew to position (${x}, ${y}, ${z}).`);
@@ -595,11 +596,11 @@ function registerFlightTools(server: McpServer, bot: any) {
         if (controller.signal.aborted) {
           const currentPosAfterTimeout = bot.entity.position;
           return createErrorResponse(
-            `Flight timed out after ${FLIGHT_TIMEOUT_MS/1000} seconds. The destination may be unreachable. ` +
+            `Flight timed out after ${FLIGHT_TIMEOUT_MS / 1000} seconds. The destination may be unreachable. ` +
             `Current position: (${Math.floor(currentPosAfterTimeout.x)}, ${Math.floor(currentPosAfterTimeout.y)}, ${Math.floor(currentPosAfterTimeout.z)})`
           );
         }
-        
+
         console.error(`Flight error: ${formatErrorForLogging(error)}`);
         return createErrorResponse(error);
       } finally {
@@ -611,19 +612,19 @@ function registerFlightTools(server: McpServer, bot: any) {
 }
 
 function createCancellableFlightOperation(
-  bot: any, 
-  destination: Vec3, 
+  bot: any,
+  destination: Vec3,
   controller: AbortController
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     let aborted = false;
-    
+
     controller.signal.addEventListener('abort', () => {
       aborted = true;
       bot.creative.stopFlying();
       reject(new Error("Flight operation cancelled"));
     });
-    
+
     bot.creative.flyTo(destination)
       .then(() => {
         if (!aborted) {
