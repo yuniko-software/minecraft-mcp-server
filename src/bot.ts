@@ -74,12 +74,23 @@ function createResponse(text: string): McpResponse {
 }
 
 function createErrorResponse(error: Error | string): McpResponse {
-  const errorMessage = typeof error === 'string' ? error : error.message;
+  const errorMessage = formatErrorForLogging(error);
   console.error(`Error: ${errorMessage}`);
   return {
     content: [{ type: "text", text: `Failed: ${errorMessage}` }],
     isError: true
   };
+}
+
+function formatErrorForLogging(error: unknown): string {
+  if (error instanceof Error) {
+    return error.stack || error.message;
+  }
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
 }
 
 // ========== Bot Setup ==========
@@ -118,11 +129,11 @@ function setupBot(argv: any) {
   });
 
   bot.on('kicked', (reason) => {
-    console.error(`Bot was kicked: ${reason}`);
+    console.error(`Bot was kicked: ${formatErrorForLogging(reason)}`);
   });
 
   bot.on('error', (err) => {
-    console.error(`Bot error: ${err.message}`);
+    console.error(`Bot error: ${formatErrorForLogging(err)}`);
   });
 
   return bot;
@@ -390,7 +401,7 @@ function registerBlockTools(server: McpServer, bot: any) {
               await bot.placeBlock(referenceBlock, face.vector.scaled(-1));
               return createResponse(`Placed block at (${x}, ${y}, ${z}) using ${face.direction} face`);
             } catch (placeError) {
-              console.error(`Failed to place using ${face.direction} face: ${(placeError as Error).message}`);
+              console.error(`Failed to place using ${face.direction} face: ${formatErrorForLogging(placeError)}`);
               continue;
             }
           }
@@ -562,22 +573,22 @@ function registerFlightTools(server: McpServer, bot: any) {
       if (!bot.creative) {
         return createResponse("Creative mode is not available. Cannot fly.");
       }
-      
+
       const currentPos = bot.entity.position;
       console.error(`Flying from (${Math.floor(currentPos.x)}, ${Math.floor(currentPos.y)}, ${Math.floor(currentPos.z)}) to (${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)})`);
-  
+
       const controller = new AbortController();
       const FLIGHT_TIMEOUT_MS = 20000;
-      
+
       const timeoutId = setTimeout(() => {
         if (!controller.signal.aborted) {
           controller.abort();
         }
       }, FLIGHT_TIMEOUT_MS);
-      
+
       try {
         const destination = new Vec3(x, y, z);
-        
+
         await createCancellableFlightOperation(bot, destination, controller);
 
         return createResponse(`Successfully flew to position (${x}, ${y}, ${z}).`);
@@ -585,12 +596,12 @@ function registerFlightTools(server: McpServer, bot: any) {
         if (controller.signal.aborted) {
           const currentPosAfterTimeout = bot.entity.position;
           return createErrorResponse(
-            `Flight timed out after ${FLIGHT_TIMEOUT_MS/1000} seconds. The destination may be unreachable. ` +
+            `Flight timed out after ${FLIGHT_TIMEOUT_MS / 1000} seconds. The destination may be unreachable. ` +
             `Current position: (${Math.floor(currentPosAfterTimeout.x)}, ${Math.floor(currentPosAfterTimeout.y)}, ${Math.floor(currentPosAfterTimeout.z)})`
           );
         }
-        
-        console.error('Flight error:', error);
+
+        console.error(`Flight error: ${formatErrorForLogging(error)}`);
         return createErrorResponse(error as Error);
       } finally {
         clearTimeout(timeoutId);
@@ -601,19 +612,19 @@ function registerFlightTools(server: McpServer, bot: any) {
 }
 
 function createCancellableFlightOperation(
-  bot: any, 
-  destination: Vec3, 
+  bot: any,
+  destination: Vec3,
   controller: AbortController
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     let aborted = false;
-    
+
     controller.signal.addEventListener('abort', () => {
       aborted = true;
       bot.creative.stopFlying();
       reject(new Error("Flight operation cancelled"));
     });
-    
+
     bot.creative.flyTo(destination)
       .then(() => {
         if (!aborted) {
@@ -674,7 +685,7 @@ async function main() {
     await server.connect(transport);
     console.error("Minecraft MCP Server running on stdio");
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error(`Failed to start server: ${formatErrorForLogging(error)}`);
     if (bot) bot.quit();
     process.exit(1);
   }
@@ -682,6 +693,6 @@ async function main() {
 
 // Start the application
 main().catch((error) => {
-  console.error("Fatal error in main():", error);
+  console.error(`Fatal error in main(): ${formatErrorForLogging(error)}`);
   process.exit(1);
 });
