@@ -41,6 +41,12 @@ interface FaceOption {
 type Direction = 'forward' | 'back' | 'left' | 'right';
 type FaceDirection = 'up' | 'down' | 'north' | 'south' | 'east' | 'west';
 
+interface StoredMessage {
+  timestamp: number;
+  username: string;
+  content: string;
+}
+
 // ========== Command Line Argument Parsing ==========
 
 function parseCommandLineArgs() {
@@ -93,6 +99,31 @@ function formatErrorForLogging(error: unknown): string {
   }
 }
 
+// ========== Message Storage ==========
+
+class MessageStore {
+  private messages: StoredMessage[] = [];
+  private maxMessages = 100;
+
+  addMessage(username: string, content: string) {
+    const message: StoredMessage = {
+      timestamp: Date.now(),
+      username,
+      content
+    };
+
+    this.messages.push(message);
+
+    if (this.messages.length > this.maxMessages) {
+      this.messages.shift();
+    }
+  }
+
+  getRecentMessages(count: number = 10): StoredMessage[] {
+    return this.messages.slice(-count);
+  }
+}
+
 // ========== Bot Setup ==========
 
 function setupBot(argv: any) {
@@ -110,6 +141,10 @@ function setupBot(argv: any) {
   // Create a bot instance
   const bot = mineflayer.createBot(botOptions);
 
+  // Create message store instance
+  const messageStore = new MessageStore();
+  (bot as any).messageStore = messageStore;
+
   // Set up the bot when it spawns
   bot.once('spawn', async () => {
     console.error('Bot has spawned in the world');
@@ -125,7 +160,7 @@ function setupBot(argv: any) {
   // Register common event handlers
   bot.on('chat', (username, message) => {
     if (username === bot.username) return;
-    console.error(`[CHAT] ${username}: ${message}`);
+    messageStore.addMessage(username, message);
   });
 
   bot.on('kicked', (reason) => {
@@ -538,7 +573,7 @@ function registerEntityTools(server: McpServer, bot: any) {
   );
 }
 
-// ========== Chat Tool ==========
+// ========== Chat Tools ==========
 
 function registerChatTools(server: McpServer, bot: any) {
   server.tool(
@@ -551,6 +586,35 @@ function registerChatTools(server: McpServer, bot: any) {
       try {
         bot.chat(message);
         return createResponse(`Sent message: "${message}"`);
+      } catch (error) {
+        return createErrorResponse(error as Error);
+      }
+    }
+  );
+
+  server.tool(
+    "read-chat",
+    "Get recent chat messages from players",
+    {
+      count: z.number().optional().describe("Number of recent messages to retrieve (default: 10, max: 100)")
+    },
+    async ({ count = 10 }): Promise<McpResponse> => {
+      try {
+        const messageStore = bot.messageStore as MessageStore;
+        const maxCount = Math.min(count, 100);
+        const messages = messageStore.getRecentMessages(maxCount);
+
+        if (messages.length === 0) {
+          return createResponse("No chat messages found");
+        }
+
+        let output = `Found ${messages.length} chat message(s):\n\n`;
+        messages.forEach((msg, index) => {
+          const timestamp = new Date(msg.timestamp).toISOString();
+          output += `${index + 1}. ${timestamp} - ${msg.username}: ${msg.content}\n`;
+        });
+
+        return createResponse(output);
       } catch (error) {
         return createErrorResponse(error as Error);
       }
