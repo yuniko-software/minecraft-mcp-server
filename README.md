@@ -97,6 +97,7 @@ Once connected to a Minecraft server, Claude can use these commands:
 
 ### Communication
 - `send-chat` - Send a chat message in-game
+- `read-chat` - Get recent chat messages from players
 
 ### Game State
 - `detect-gamemode` - Detect the gamemode on game
