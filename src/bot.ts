@@ -105,9 +105,11 @@ function formatErrorForLogging(error: unknown): string {
 
 // ========== Message Storage ==========
 
+const MAX_STORED_MESSAGES = 100;
+
 class MessageStore {
   private messages: StoredMessage[] = [];
-  private maxMessages = 100;
+  private maxMessages = MAX_STORED_MESSAGES;
 
   addMessage(username: string, content: string) {
     const message: StoredMessage = {
@@ -605,7 +607,7 @@ function registerChatTools(server: McpServer, bot: ExtendedBot) {
     async ({ count = 10 }): Promise<McpResponse> => {
       try {
         const messageStore = bot.messageStore;
-        const maxCount = Math.min(count, 100);
+        const maxCount = Math.min(count, MAX_STORED_MESSAGES);
         const messages = messageStore.getRecentMessages(maxCount);
 
         if (messages.length === 0) {
