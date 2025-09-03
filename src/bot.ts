@@ -47,6 +47,10 @@ interface StoredMessage {
   content: string;
 }
 
+interface ExtendedBot extends mineflayer.Bot {
+  messageStore: MessageStore;
+}
+
 // ========== Command Line Argument Parsing ==========
 
 function parseCommandLineArgs() {
@@ -126,7 +130,7 @@ class MessageStore {
 
 // ========== Bot Setup ==========
 
-function setupBot(argv: any) {
+function setupBot(argv: any): ExtendedBot {
   // Configure bot options based on command line arguments
   const botOptions = {
     host: argv.host,
@@ -139,11 +143,11 @@ function setupBot(argv: any) {
   console.error(`Connecting to Minecraft server at ${argv.host}:${argv.port} as ${argv.username}`);
 
   // Create a bot instance
-  const bot = mineflayer.createBot(botOptions);
+  const bot = mineflayer.createBot(botOptions) as ExtendedBot;
 
   // Create message store instance
   const messageStore = new MessageStore();
-  (bot as any).messageStore = messageStore;
+  bot.messageStore = messageStore;
 
   // Set up the bot when it spawns
   bot.once('spawn', async () => {
@@ -176,7 +180,7 @@ function setupBot(argv: any) {
 
 // ========== MCP Server Configuration ==========
 
-function createMcpServer(bot: any) {
+function createMcpServer(bot: ExtendedBot) {
   const server = new McpServer({
     name: "minecraft-bot",
     version: "1.0.0",
@@ -196,7 +200,7 @@ function createMcpServer(bot: any) {
 
 // ========== Position and Movement Tools ==========
 
-function registerPositionTools(server: McpServer, bot: any) {
+function registerPositionTools(server: McpServer, bot: ExtendedBot) {
   server.tool(
     "get-position",
     "Get the current position of the bot",
@@ -300,7 +304,7 @@ function registerPositionTools(server: McpServer, bot: any) {
 
 // ========== Inventory Management Tools ==========
 
-function registerInventoryTools(server: McpServer, bot: any) {
+function registerInventoryTools(server: McpServer, bot: ExtendedBot) {
   server.tool(
     "list-inventory",
     "List all items in the bot's inventory",
@@ -383,7 +387,7 @@ function registerInventoryTools(server: McpServer, bot: any) {
 
 // ========== Block Interaction Tools ==========
 
-function registerBlockTools(server: McpServer, bot: any) {
+function registerBlockTools(server: McpServer, bot: ExtendedBot) {
   server.tool(
     "place-block",
     "Place a block at the specified position",
@@ -542,7 +546,7 @@ function registerBlockTools(server: McpServer, bot: any) {
 
 // ========== Entity Interaction Tools ==========
 
-function registerEntityTools(server: McpServer, bot: any) {
+function registerEntityTools(server: McpServer, bot: ExtendedBot) {
   server.tool(
     "find-entity",
     "Find the nearest entity of a specific type",
@@ -575,7 +579,7 @@ function registerEntityTools(server: McpServer, bot: any) {
 
 // ========== Chat Tools ==========
 
-function registerChatTools(server: McpServer, bot: any) {
+function registerChatTools(server: McpServer, bot: ExtendedBot) {
   server.tool(
     "send-chat",
     "Send a chat message in-game",
@@ -600,7 +604,7 @@ function registerChatTools(server: McpServer, bot: any) {
     },
     async ({ count = 10 }): Promise<McpResponse> => {
       try {
-        const messageStore = bot.messageStore as MessageStore;
+        const messageStore = bot.messageStore;
         const maxCount = Math.min(count, 100);
         const messages = messageStore.getRecentMessages(maxCount);
 
@@ -624,7 +628,7 @@ function registerChatTools(server: McpServer, bot: any) {
 
 // ========== Flight Tools ==========
 
-function registerFlightTools(server: McpServer, bot: any) {
+function registerFlightTools(server: McpServer, bot: ExtendedBot) {
   server.tool(
     "fly-to",
     "Make the bot fly to a specific position",
@@ -676,7 +680,7 @@ function registerFlightTools(server: McpServer, bot: any) {
 }
 
 function createCancellableFlightOperation(
-  bot: any,
+  bot: ExtendedBot,
   destination: Vec3,
   controller: AbortController
 ): Promise<boolean> {
@@ -705,7 +709,7 @@ function createCancellableFlightOperation(
 
 // ========== Game State Tools ============
 
-function registerGameStateTools(server: McpServer, bot: any) {
+function registerGameStateTools(server: McpServer, bot: ExtendedBot) {
   server.tool(
     "detect-gamemode",
     "Detect the gamemode on game",
@@ -723,7 +727,7 @@ function registerGameStateTools(server: McpServer, bot: any) {
 // ========== Main Application ==========
 
 async function main() {
-  let bot: mineflayer.Bot | undefined;
+  let bot: ExtendedBot | undefined;
 
   try {
     // Parse command line arguments
