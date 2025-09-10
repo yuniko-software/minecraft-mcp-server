@@ -141,8 +141,6 @@ function setupBot(argv: any): ExtendedBot {
     plugins: { pathfinder },
   };
 
-  // Log connection information
-
   // Create a bot instance
   const bot = mineflayer.createBot(botOptions) as ExtendedBot;
 
@@ -641,7 +639,7 @@ function registerFlightTools(server: McpServer, bot: ExtendedBot) {
       if (!bot.creative) {
         return createResponse("Creative mode is not available. Cannot fly.");
       }
-      
+
       const controller = new AbortController();
       const FLIGHT_TIMEOUT_MS = 20000;
 
