@@ -1,6 +1,6 @@
 # Minecraft MCP Server
 
-> ⚠️ **IMPORTANT COMPATIBILITY WARNING**: This bot is currently compatible with Minecraft 1.21.6. Please use Minecraft 1.21.6 or lower versions. Higher versions (1.21.7+) are not supported yet until we release future updates.
+> ⚠️ **CLAUDE DESKTOP DUAL LAUNCH WARNING**: Claude Desktop may sometimes launch MCP servers twice ([known issue](https://github.com/modelcontextprotocol/servers/issues/812)), which can lead to incorrect behavior of this MCP server. If you experience issues, restart Claude Desktop application to fix the problem. Alternatively, consider using other MCP clients.
 
 https://github.com/user-attachments/assets/6f17f329-3991-4bc7-badd-7cde9aacb92f
 
@@ -14,7 +14,7 @@ A Minecraft bot powered by large language models and [Mineflayer API](https://gi
 
 - Git
 - Node.js
-- A running Minecraft game (the setup below was tested with Minecraft 1.21.6 Java Edition included in Microsoft Game Pass)
+- A running Minecraft game (the setup below was tested with Minecraft 1.21.8 Java Edition included in Microsoft Game Pass)
 - An MCP-compatible client. Claude Desktop will be used as an example, but other MCP clients are also supported
 
 ## Getting started
