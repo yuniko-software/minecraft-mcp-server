@@ -3,7 +3,7 @@
 ## Prerequisites
 - Git
 - Node.js (>=16.0.0)
-- A running Minecraft game (tested with Minecraft 1.21.6 Java Edition)
+- A running Minecraft game (tested with Minecraft 1.21.8 Java Edition)
 - Claude Desktop (or another MCP-compatible client)
 
 ### 1. Fork and Clone the Repository
