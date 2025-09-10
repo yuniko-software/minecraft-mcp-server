@@ -47,9 +47,6 @@ interface StoredMessage {
   content: string;
 }
 
-interface ExtendedBot extends mineflayer.Bot {
-  messageStore: MessageStore;
-}
 
 // ========== Command Line Argument Parsing ==========
 
@@ -75,7 +72,14 @@ function parseCommandLineArgs() {
     .parseSync();
 }
 
-// ========== Response Helpers ==========
+// ========== Logging and Responding ==========
+
+type LogLevel = 'info' | 'warn' | 'error';
+
+function log(level: LogLevel, message: string) {
+  const timestamp = new Date().toISOString();
+  process.stderr.write(`${timestamp} [minecraft] [${level}] ${message}\n`);
+}
 
 function createResponse(text: string): McpResponse {
   return {
@@ -84,15 +88,15 @@ function createResponse(text: string): McpResponse {
 }
 
 function createErrorResponse(error: Error | string): McpResponse {
-  const errorMessage = formatErrorForLogging(error);
-  process.stderr.write(`Error: ${errorMessage}\n`);
+  const errorMessage = formatError(error);
+  log('error', errorMessage);
   return {
     content: [{ type: "text", text: `Failed: ${errorMessage}` }],
     isError: true
   };
 }
 
-function formatErrorForLogging(error: unknown): string {
+function formatError(error: unknown): string {
   if (error instanceof Error) {
     return error.stack || error.message;
   }
@@ -130,9 +134,12 @@ class MessageStore {
   }
 }
 
+// Global message store instance
+const messageStore = new MessageStore();
+
 // ========== Bot Setup ==========
 
-function setupBot(argv: any): ExtendedBot {
+function setupBot(argv: any): mineflayer.Bot {
   // Configure bot options based on command line arguments
   const botOptions = {
     host: argv.host,
@@ -142,11 +149,7 @@ function setupBot(argv: any): ExtendedBot {
   };
 
   // Create a bot instance
-  const bot = mineflayer.createBot(botOptions) as ExtendedBot;
-
-  // Create message store instance
-  const messageStore = new MessageStore();
-  bot.messageStore = messageStore;
+  const bot = mineflayer.createBot(botOptions);
 
   // Set up the bot when it spawns
   bot.once('spawn', async () => {
@@ -156,7 +159,8 @@ function setupBot(argv: any): ExtendedBot {
     const defaultMove = new Movements(bot, mcData);
     bot.pathfinder.setMovements(defaultMove);
 
-    bot.chat('Claude-powered bot ready to receive instructions!');
+    bot.chat('LLM-powered bot ready to receive instructions!');
+    log('info', `Server started and connected successfully. Bot: ${argv.username} on ${argv.host}:${argv.port}`);
   });
 
   // Register common event handlers
@@ -166,11 +170,12 @@ function setupBot(argv: any): ExtendedBot {
   });
 
   bot.on('kicked', (reason) => {
-    process.stderr.write(`Bot was kicked: ${formatErrorForLogging(reason)}\n`);
+    log('error', `Bot was kicked: ${formatError(reason)}`);
+    bot.quit();
   });
 
   bot.on('error', (err) => {
-    process.stderr.write(`Bot error: ${formatErrorForLogging(err)}\n`);
+    log('error', `Bot error: ${formatError(err)}`);
   });
 
   return bot;
@@ -178,10 +183,10 @@ function setupBot(argv: any): ExtendedBot {
 
 // ========== MCP Server Configuration ==========
 
-function createMcpServer(bot: ExtendedBot) {
+function createMcpServer(bot: mineflayer.Bot) {
   const server = new McpServer({
-    name: "minecraft-bot",
-    version: "1.0.0",
+    name: "minecraft-mcp-server",
+    version: "1.2.0"
   });
 
   // Register all tool categories
@@ -198,7 +203,7 @@ function createMcpServer(bot: ExtendedBot) {
 
 // ========== Position and Movement Tools ==========
 
-function registerPositionTools(server: McpServer, bot: ExtendedBot) {
+function registerPositionTools(server: McpServer, bot: mineflayer.Bot) {
   server.tool(
     "get-position",
     "Get the current position of the bot",
@@ -302,7 +307,7 @@ function registerPositionTools(server: McpServer, bot: ExtendedBot) {
 
 // ========== Inventory Management Tools ==========
 
-function registerInventoryTools(server: McpServer, bot: ExtendedBot) {
+function registerInventoryTools(server: McpServer, bot: mineflayer.Bot) {
   server.tool(
     "list-inventory",
     "List all items in the bot's inventory",
@@ -385,7 +390,7 @@ function registerInventoryTools(server: McpServer, bot: ExtendedBot) {
 
 // ========== Block Interaction Tools ==========
 
-function registerBlockTools(server: McpServer, bot: ExtendedBot) {
+function registerBlockTools(server: McpServer, bot: mineflayer.Bot) {
   server.tool(
     "place-block",
     "Place a block at the specified position",
@@ -438,7 +443,7 @@ function registerBlockTools(server: McpServer, bot: ExtendedBot) {
               await bot.placeBlock(referenceBlock, face.vector.scaled(-1));
               return createResponse(`Placed block at (${x}, ${y}, ${z}) using ${face.direction} face`);
             } catch (placeError) {
-              process.stderr.write(`Failed to place using ${face.direction} face: ${formatErrorForLogging(placeError)}\n`);
+              log('warn', `Failed to place using ${face.direction} face: ${formatError(placeError)}`);
               continue;
             }
           }
@@ -544,7 +549,7 @@ function registerBlockTools(server: McpServer, bot: ExtendedBot) {
 
 // ========== Entity Interaction Tools ==========
 
-function registerEntityTools(server: McpServer, bot: ExtendedBot) {
+function registerEntityTools(server: McpServer, bot: mineflayer.Bot) {
   server.tool(
     "find-entity",
     "Find the nearest entity of a specific type",
@@ -577,7 +582,7 @@ function registerEntityTools(server: McpServer, bot: ExtendedBot) {
 
 // ========== Chat Tools ==========
 
-function registerChatTools(server: McpServer, bot: ExtendedBot) {
+function registerChatTools(server: McpServer, bot: mineflayer.Bot) {
   server.tool(
     "send-chat",
     "Send a chat message in-game",
@@ -602,7 +607,6 @@ function registerChatTools(server: McpServer, bot: ExtendedBot) {
     },
     async ({ count = 10 }): Promise<McpResponse> => {
       try {
-        const messageStore = bot.messageStore;
         const maxCount = Math.min(count, MAX_STORED_MESSAGES);
         const messages = messageStore.getRecentMessages(maxCount);
 
@@ -626,7 +630,7 @@ function registerChatTools(server: McpServer, bot: ExtendedBot) {
 
 // ========== Flight Tools ==========
 
-function registerFlightTools(server: McpServer, bot: ExtendedBot) {
+function registerFlightTools(server: McpServer, bot: mineflayer.Bot) {
   server.tool(
     "fly-to",
     "Make the bot fly to a specific position",
@@ -664,7 +668,7 @@ function registerFlightTools(server: McpServer, bot: ExtendedBot) {
           );
         }
 
-        process.stderr.write(`Flight error: ${formatErrorForLogging(error)}\n`);
+        log('error', `Flight error: ${formatError(error)}`);
         return createErrorResponse(error as Error);
       } finally {
         clearTimeout(timeoutId);
@@ -675,7 +679,7 @@ function registerFlightTools(server: McpServer, bot: ExtendedBot) {
 }
 
 function createCancellableFlightOperation(
-  bot: ExtendedBot,
+  bot: mineflayer.Bot,
   destination: Vec3,
   controller: AbortController
 ): Promise<boolean> {
@@ -704,7 +708,7 @@ function createCancellableFlightOperation(
 
 // ========== Game State Tools ============
 
-function registerGameStateTools(server: McpServer, bot: ExtendedBot) {
+function registerGameStateTools(server: McpServer, bot: mineflayer.Bot) {
   server.tool(
     "detect-gamemode",
     "Detect the gamemode on game",
@@ -722,7 +726,7 @@ function registerGameStateTools(server: McpServer, bot: ExtendedBot) {
 // ========== Main Application ==========
 
 async function main() {
-  let bot: ExtendedBot | undefined;
+  let bot: mineflayer.Bot | undefined;
 
   try {
     // Parse command line arguments
@@ -734,12 +738,10 @@ async function main() {
     // Create and configure MCP server
     const server = createMcpServer(bot);
 
-    // Handle stdin end - this will detect when Claude Desktop is closed
+    // Handle stdin end - this will detect when MCP Client is closed
     process.stdin.on('end', () => {
-      process.stderr.write("Claude has disconnected. Shutting down...\n");
-      if (bot) {
-        bot.quit();
-      }
+      if (bot) bot.quit();
+      log('info', 'MCP Client has disconnected. Shutting down...');
       process.exit(0);
     });
 
@@ -747,14 +749,14 @@ async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
   } catch (error) {
-    process.stderr.write(`Failed to start server: ${formatErrorForLogging(error)}\n`);
     if (bot) bot.quit();
+    log('error', `Failed to start server: ${formatError(error)}`);
     process.exit(1);
   }
 }
 
 // Start the application
 main().catch((error) => {
-  process.stderr.write(`Fatal error in main(): ${formatErrorForLogging(error)}\n`);
+  log('error', `Fatal error in main(): ${formatError(error)}`);
   process.exit(1);
 });
