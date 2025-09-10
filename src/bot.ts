@@ -85,7 +85,7 @@ function createResponse(text: string): McpResponse {
 
 function createErrorResponse(error: Error | string): McpResponse {
   const errorMessage = formatErrorForLogging(error);
-  console.error(`Error: ${errorMessage}`);
+  process.stderr.write(`Error: ${errorMessage}`);
   return {
     content: [{ type: "text", text: `Failed: ${errorMessage}` }],
     isError: true
@@ -142,7 +142,7 @@ function setupBot(argv: any): ExtendedBot {
   };
 
   // Log connection information
-  console.error(`Connecting to Minecraft server at ${argv.host}:${argv.port} as ${argv.username}`);
+  process.stderr.write(`Connecting to Minecraft server at ${argv.host}:${argv.port} as ${argv.username}`);
 
   // Create a bot instance
   const bot = mineflayer.createBot(botOptions) as ExtendedBot;
@@ -153,7 +153,7 @@ function setupBot(argv: any): ExtendedBot {
 
   // Set up the bot when it spawns
   bot.once('spawn', async () => {
-    console.error('Bot has spawned in the world');
+    process.stderr.write('Bot has spawned in the world');
 
     // Set up pathfinder movements
     const mcData = minecraftData(bot.version);
@@ -170,11 +170,11 @@ function setupBot(argv: any): ExtendedBot {
   });
 
   bot.on('kicked', (reason) => {
-    console.error(`Bot was kicked: ${formatErrorForLogging(reason)}`);
+    process.stderr.write(`Bot was kicked: ${formatErrorForLogging(reason)}`);
   });
 
   bot.on('error', (err) => {
-    console.error(`Bot error: ${formatErrorForLogging(err)}`);
+    process.stderr.write(`Bot error: ${formatErrorForLogging(err)}`);
   });
 
   return bot;
@@ -442,7 +442,7 @@ function registerBlockTools(server: McpServer, bot: ExtendedBot) {
               await bot.placeBlock(referenceBlock, face.vector.scaled(-1));
               return createResponse(`Placed block at (${x}, ${y}, ${z}) using ${face.direction} face`);
             } catch (placeError) {
-              console.error(`Failed to place using ${face.direction} face: ${formatErrorForLogging(placeError)}`);
+              process.stderr.write(`Failed to place using ${face.direction} face: ${formatErrorForLogging(placeError)}`);
               continue;
             }
           }
@@ -645,7 +645,7 @@ function registerFlightTools(server: McpServer, bot: ExtendedBot) {
       }
 
       const currentPos = bot.entity.position;
-      console.error(`Flying from (${Math.floor(currentPos.x)}, ${Math.floor(currentPos.y)}, ${Math.floor(currentPos.z)}) to (${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)})`);
+      process.stderr.write(`Flying from (${Math.floor(currentPos.x)}, ${Math.floor(currentPos.y)}, ${Math.floor(currentPos.z)}) to (${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)})\n`);
 
       const controller = new AbortController();
       const FLIGHT_TIMEOUT_MS = 20000;
@@ -671,7 +671,7 @@ function registerFlightTools(server: McpServer, bot: ExtendedBot) {
           );
         }
 
-        console.error(`Flight error: ${formatErrorForLogging(error)}`);
+        process.stderr.write(`Flight error: ${formatErrorForLogging(error)}`);
         return createErrorResponse(error as Error);
       } finally {
         clearTimeout(timeoutId);
@@ -743,7 +743,7 @@ async function main() {
 
     // Handle stdin end - this will detect when Claude Desktop is closed
     process.stdin.on('end', () => {
-      console.error("Claude has disconnected. Shutting down...");
+      process.stderr.write("Claude has disconnected. Shutting down...\n");
       if (bot) {
         bot.quit();
       }
@@ -753,9 +753,9 @@ async function main() {
     // Connect to the transport
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error("Minecraft MCP Server running on stdio");
+    process.stderr.write("Minecraft MCP Server running on stdio\n");
   } catch (error) {
-    console.error(`Failed to start server: ${formatErrorForLogging(error)}`);
+    process.stderr.write(`Failed to start server: ${formatErrorForLogging(error)}\n`);
     if (bot) bot.quit();
     process.exit(1);
   }
@@ -763,6 +763,6 @@ async function main() {
 
 // Start the application
 main().catch((error) => {
-  console.error(`Fatal error in main(): ${formatErrorForLogging(error)}`);
+  process.stderr.write(`Fatal error in main(): ${formatErrorForLogging(error)}\n`);
   process.exit(1);
 });
