@@ -28,7 +28,7 @@
     "@types/yargs": "^17.0.33",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.39.1",
-    "eslint": "^9.34.0",
+    "eslint": "^9.35.0",
     "typescript": "^5.9.2"
   },
   "engines": {
