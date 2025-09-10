@@ -85,7 +85,7 @@ function createResponse(text: string): McpResponse {
 
 function createErrorResponse(error: Error | string): McpResponse {
   const errorMessage = formatErrorForLogging(error);
-  process.stderr.write(`Error: ${errorMessage}`);
+  process.stderr.write(`Error: ${errorMessage}\n`);
   return {
     content: [{ type: "text", text: `Failed: ${errorMessage}` }],
     isError: true
@@ -142,7 +142,7 @@ function setupBot(argv: any): ExtendedBot {
   };
 
   // Log connection information
-  process.stderr.write(`Connecting to Minecraft server at ${argv.host}:${argv.port} as ${argv.username}`);
+  process.stdout.write(`Connecting to Minecraft server at ${argv.host}:${argv.port} as ${argv.username}\n`);
 
   // Create a bot instance
   const bot = mineflayer.createBot(botOptions) as ExtendedBot;
@@ -153,7 +153,7 @@ function setupBot(argv: any): ExtendedBot {
 
   // Set up the bot when it spawns
   bot.once('spawn', async () => {
-    process.stderr.write('Bot has spawned in the world');
+    process.stdout.write('Bot has spawned in the world\n');
 
     // Set up pathfinder movements
     const mcData = minecraftData(bot.version);
@@ -170,11 +170,11 @@ function setupBot(argv: any): ExtendedBot {
   });
 
   bot.on('kicked', (reason) => {
-    process.stderr.write(`Bot was kicked: ${formatErrorForLogging(reason)}`);
+    process.stderr.write(`Bot was kicked: ${formatErrorForLogging(reason)}\n`);
   });
 
   bot.on('error', (err) => {
-    process.stderr.write(`Bot error: ${formatErrorForLogging(err)}`);
+    process.stderr.write(`Bot error: ${formatErrorForLogging(err)}\n`);
   });
 
   return bot;
@@ -442,7 +442,7 @@ function registerBlockTools(server: McpServer, bot: ExtendedBot) {
               await bot.placeBlock(referenceBlock, face.vector.scaled(-1));
               return createResponse(`Placed block at (${x}, ${y}, ${z}) using ${face.direction} face`);
             } catch (placeError) {
-              process.stderr.write(`Failed to place using ${face.direction} face: ${formatErrorForLogging(placeError)}`);
+              process.stderr.write(`Failed to place using ${face.direction} face: ${formatErrorForLogging(placeError)}\n`);
               continue;
             }
           }
@@ -645,7 +645,7 @@ function registerFlightTools(server: McpServer, bot: ExtendedBot) {
       }
 
       const currentPos = bot.entity.position;
-      process.stderr.write(`Flying from (${Math.floor(currentPos.x)}, ${Math.floor(currentPos.y)}, ${Math.floor(currentPos.z)}) to (${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)})\n`);
+      process.stdout.write(`Flying from (${Math.floor(currentPos.x)}, ${Math.floor(currentPos.y)}, ${Math.floor(currentPos.z)}) to (${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)})\n`);
 
       const controller = new AbortController();
       const FLIGHT_TIMEOUT_MS = 20000;
@@ -671,7 +671,7 @@ function registerFlightTools(server: McpServer, bot: ExtendedBot) {
           );
         }
 
-        process.stderr.write(`Flight error: ${formatErrorForLogging(error)}`);
+        process.stderr.write(`Flight error: ${formatErrorForLogging(error)}\n`);
         return createErrorResponse(error as Error);
       } finally {
         clearTimeout(timeoutId);
@@ -753,7 +753,7 @@ async function main() {
     // Connect to the transport
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    process.stderr.write("Minecraft MCP Server running on stdio\n");
+    process.stdout.write("Minecraft MCP Server running on stdio\n");
   } catch (error) {
     process.stderr.write(`Failed to start server: ${formatErrorForLogging(error)}\n`);
     if (bot) bot.quit();
