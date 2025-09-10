@@ -641,9 +641,7 @@ function registerFlightTools(server: McpServer, bot: ExtendedBot) {
       if (!bot.creative) {
         return createResponse("Creative mode is not available. Cannot fly.");
       }
-
-      const currentPos = bot.entity.position;
-
+      
       const controller = new AbortController();
       const FLIGHT_TIMEOUT_MS = 20000;
 
