@@ -1,15 +1,15 @@
 {
   "name": "minecraft-mcp-server",
   "version": "1.0.0",
-  "main": "dist/bot.js",
+  "main": "dist/main.js",
   "type": "module",
   "bin": {
-    "minecraft-mcp-server": "dist/bot.js"
+    "minecraft-mcp-server": "dist/main.js"
   },
   "scripts": {
     "prepare": "npm run build",
     "build": "tsc",
-    "start": "node dist/bot.js",
+    "start": "node dist/main.js",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=100",
     "lint:fix": "eslint \"src/**/*.ts\" --fix"
   },
