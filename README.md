@@ -1,6 +1,7 @@
 # Minecraft MCP Server
 
-> ⚠️ **CLAUDE DESKTOP DUAL LAUNCH WARNING**: Claude Desktop may sometimes launch MCP servers twice ([known issue](https://github.com/modelcontextprotocol/servers/issues/812)), which can lead to incorrect behavior of this MCP server. If you experience issues, restart Claude Desktop application to fix the problem. Alternatively, consider using other MCP clients.
+> [!IMPORTANT]
+> Currently supports Minecraft version 1.21.8. Newer versions may not work with this MCP server, but we will add support as soon as possible.
 
 https://github.com/user-attachments/assets/6f17f329-3991-4bc7-badd-7cde9aacb92f
 
