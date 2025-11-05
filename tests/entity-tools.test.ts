@@ -4,6 +4,7 @@ import { registerEntityTools } from '../src/tools/entity-tools.js';
 import { ToolFactory } from '../src/tool-factory.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BotConnection } from '../src/bot-connection.js';
+import type mineflayer from 'mineflayer';
 import { Vec3 } from 'vec3';
 
 test('registerEntityTools registers find-entity tool', (t) => {
@@ -14,8 +15,8 @@ test('registerEntityTools registers find-entity tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerEntityTools(factory, getBot);
 
@@ -45,8 +46,8 @@ test('find-entity returns entity when found', async (t) => {
       position: new Vec3(0, 64, 0)
     },
     nearestEntity: sinon.stub().returns(mockEntity)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerEntityTools(factory, getBot);
 
@@ -81,8 +82,8 @@ test('find-entity returns not found when entity too far', async (t) => {
       position: new Vec3(0, 64, 0)
     },
     nearestEntity: sinon.stub().returns(mockEntity)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerEntityTools(factory, getBot);
 
@@ -109,8 +110,8 @@ test('find-entity returns not found when no entity exists', async (t) => {
       position: new Vec3(0, 64, 0)
     },
     nearestEntity: sinon.stub().returns(null)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerEntityTools(factory, getBot);
 
@@ -142,8 +143,8 @@ test('find-entity handles player type', async (t) => {
       position: new Vec3(0, 64, 0)
     },
     nearestEntity: sinon.stub().returns(mockEntity)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerEntityTools(factory, getBot);
 
@@ -175,8 +176,8 @@ test('find-entity searches any entity when type not specified', async (t) => {
       position: new Vec3(0, 64, 0)
     },
     nearestEntity: sinon.stub().returns(mockEntity)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerEntityTools(factory, getBot);
 

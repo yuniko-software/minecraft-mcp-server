@@ -5,10 +5,10 @@ test('log writes to stderr', (t) => {
   const originalWrite = process.stderr.write;
   let capturedOutput = '';
   
-  process.stderr.write = ((chunk: any) => {
+  process.stderr.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stderr.write;
   
   log('info', 'Test message');
   
@@ -22,10 +22,10 @@ test('log format includes all required components', (t) => {
   const originalWrite = process.stderr.write;
   let capturedOutput = '';
   
-  process.stderr.write = ((chunk: any) => {
+  process.stderr.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stderr.write;
   
   log('error', 'Connection failed');
   
@@ -42,10 +42,10 @@ test('log includes ISO timestamp', (t) => {
   const originalWrite = process.stderr.write;
   let capturedOutput = '';
   
-  process.stderr.write = ((chunk: any) => {
+  process.stderr.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stderr.write;
   
   const beforeTime = new Date().toISOString();
   log('info', 'Timing test');
@@ -66,10 +66,10 @@ test('log handles different log levels', (t) => {
   const originalWrite = process.stderr.write;
   const outputs: string[] = [];
   
-  process.stderr.write = ((chunk: any) => {
+  process.stderr.write = ((chunk: string | Uint8Array) => {
     outputs.push(chunk.toString());
     return true;
-  }) as any;
+  }) as typeof process.stderr.write;
   
   log('info', 'Info message');
   log('warn', 'Warning message');
@@ -89,10 +89,10 @@ test('log handles empty message', (t) => {
   const originalWrite = process.stderr.write;
   let capturedOutput = '';
   
-  process.stderr.write = ((chunk: any) => {
+  process.stderr.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stderr.write;
   
   log('info', '');
   
@@ -107,10 +107,10 @@ test('log handles special characters in message', (t) => {
   const originalWrite = process.stderr.write;
   let capturedOutput = '';
   
-  process.stderr.write = ((chunk: any) => {
+  process.stderr.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stderr.write;
   
   const specialMessage = 'Error: {json: "value"} & <tag> "quotes" \'apostrophes\'';
   log('error', specialMessage);
@@ -126,10 +126,10 @@ test('log handles multiline message', (t) => {
   const originalWrite = process.stderr.write;
   let capturedOutput = '';
   
-  process.stderr.write = ((chunk: any) => {
+  process.stderr.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stderr.write;
   
   const multilineMessage = 'Line 1\nLine 2\nLine 3';
   log('info', multilineMessage);
@@ -144,10 +144,10 @@ test('log output format is consistent', (t) => {
   const originalWrite = process.stderr.write;
   let capturedOutput = '';
   
-  process.stderr.write = ((chunk: any) => {
+  process.stderr.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stderr.write;
   
   log('info', 'Test');
   

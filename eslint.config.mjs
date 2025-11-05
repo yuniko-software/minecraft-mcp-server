@@ -28,7 +28,8 @@ export default defineConfig([
         },
         rules: {
             "@typescript-eslint/no-explicit-any": "warn",
-            "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+            "no-unused-vars": "off",
+            "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
             "@typescript-eslint/explicit-module-boundary-types": "off",
             "no-console": "off",
             "ava/no-only-test": "error",

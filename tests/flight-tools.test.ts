@@ -4,6 +4,7 @@ import { registerFlightTools } from '../src/tools/flight-tools.js';
 import { ToolFactory } from '../src/tool-factory.js';
 import { BotConnection } from '../src/bot-connection.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type mineflayer from 'mineflayer';
 import { Vec3 } from 'vec3';
 
 test('registerFlightTools registers fly-to tool', (t) => {
@@ -14,8 +15,8 @@ test('registerFlightTools registers fly-to tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerFlightTools(factory, getBot);
 
@@ -45,8 +46,8 @@ test('fly-to successfully flies to destination', async (t) => {
     entity: {
       position: new Vec3(0, 64, 0)
     }
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerFlightTools(factory, getBot);
 
@@ -73,8 +74,8 @@ test('fly-to returns error when creative mode not available', async (t) => {
 
   const mockBot = {
     creative: null
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerFlightTools(factory, getBot);
 
@@ -106,8 +107,8 @@ test('fly-to handles flight errors', async (t) => {
     entity: {
       position: new Vec3(0, 64, 0)
     }
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerFlightTools(factory, getBot);
 

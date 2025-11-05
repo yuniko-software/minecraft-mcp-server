@@ -5,6 +5,7 @@ import { ToolFactory } from '../src/tool-factory.js';
 import { MessageStore } from '../src/message-store.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BotConnection } from '../src/bot-connection.js';
+import type mineflayer from 'mineflayer';
 
 test('registerChatTools registers send-chat tool', (t) => {
   const mockServer = {
@@ -14,8 +15,8 @@ test('registerChatTools registers send-chat tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
 
   registerChatTools(factory, getBot, messageStore);
@@ -35,8 +36,8 @@ test('registerChatTools registers read-chat tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
 
   registerChatTools(factory, getBot, messageStore);
@@ -59,8 +60,8 @@ test('send-chat calls bot.chat with message', async (t) => {
   
   const mockBot = {
     chat: sinon.stub()
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
 
   registerChatTools(factory, getBot, messageStore);
@@ -84,8 +85,8 @@ test('read-chat returns no messages when empty', async (t) => {
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
   
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
 
   registerChatTools(factory, getBot, messageStore);
@@ -108,8 +109,8 @@ test('read-chat returns formatted messages', async (t) => {
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
   
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
 
   messageStore.addMessage('player1', 'Hello');
@@ -139,8 +140,8 @@ test('read-chat respects count parameter', async (t) => {
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
   
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
 
   for (let i = 0; i < 20; i++) {
@@ -167,8 +168,8 @@ test('read-chat limits count to max messages', async (t) => {
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
   
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
   const messageStore = new MessageStore();
 
   for (let i = 0; i < 10; i++) {

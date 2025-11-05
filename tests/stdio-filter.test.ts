@@ -5,10 +5,10 @@ test('allows JSON messages to pass through', (t) => {
   const originalWrite = process.stdout.write;
   let capturedOutput = '';
   
-  process.stdout.write = ((chunk: any) => {
+  process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stdout.write;
   
   setupStdioFiltering();
   
@@ -24,10 +24,10 @@ test('allows timestamp log messages to pass through', (t) => {
   const originalWrite = process.stdout.write;
   let capturedOutput = '';
   
-  process.stdout.write = ((chunk: any) => {
+  process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stdout.write;
   
   setupStdioFiltering();
   
@@ -43,10 +43,10 @@ test('allows newline-only messages to pass through', (t) => {
   const originalWrite = process.stdout.write;
   let capturedOutput = '';
   
-  process.stdout.write = ((chunk: any) => {
+  process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stdout.write;
   
   setupStdioFiltering();
   
@@ -62,10 +62,10 @@ test('filters out random debug messages', (t) => {
   const originalWrite = process.stdout.write;
   let capturedOutput = '';
   
-  process.stdout.write = ((chunk: any) => {
+  process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stdout.write;
   
   setupStdioFiltering();
   
@@ -81,10 +81,10 @@ test('filters minecraft-protodef library output', (t) => {
   const originalWrite = process.stdout.write;
   let capturedOutput = '';
   
-  process.stdout.write = ((chunk: any) => {
+  process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stdout.write;
   
   setupStdioFiltering();
   
@@ -100,10 +100,10 @@ test('allows JSON while filtering other messages', (t) => {
   const originalWrite = process.stdout.write;
   let capturedOutput = '';
   
-  process.stdout.write = ((chunk: any) => {
+  process.stdout.write = ((chunk: string | Uint8Array) => {
     capturedOutput += chunk.toString();
     return true;
-  }) as any;
+  }) as typeof process.stdout.write;
   
   setupStdioFiltering();
   

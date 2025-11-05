@@ -24,7 +24,7 @@ export class BotConnection {
   private config: BotConfig;
   private callbacks: ConnectionCallbacks;
   private isReconnecting = false;
-  private reconnectTimer: NodeJS.Timeout | null = null;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly reconnectDelayMs: number;
 
   constructor(config: BotConfig, callbacks: ConnectionCallbacks, reconnectDelayMs = 2000) {
@@ -88,7 +88,7 @@ export class BotConnection {
     });
 
     bot.on('error', (err) => {
-      const errorCode = (err as any).code || 'Unknown error';
+      const errorCode = (err as { code?: string }).code || 'Unknown error';
       const errorMsg = err instanceof Error ? err.message : String(err);
 
       this.callbacks.onLog('error', `Bot error [${errorCode}]: ${errorMsg}`);

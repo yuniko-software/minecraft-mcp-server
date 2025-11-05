@@ -16,7 +16,7 @@ export function registerInventoryTools(factory: ToolFactory, getBot: () => minef
     async () => {
       const bot = getBot();
       const items = bot.inventory.items();
-      const itemList: InventoryItem[] = items.map((item: any) => ({
+      const itemList: InventoryItem[] = items.map((item) => ({
         name: item.name,
         count: item.count,
         slot: item.slot
@@ -44,7 +44,7 @@ export function registerInventoryTools(factory: ToolFactory, getBot: () => minef
     async ({ nameOrType }) => {
       const bot = getBot();
       const items = bot.inventory.items();
-      const item = items.find((item: any) =>
+      const item = items.find((item) =>
         item.name.includes(nameOrType.toLowerCase())
       );
 
@@ -66,7 +66,7 @@ export function registerInventoryTools(factory: ToolFactory, getBot: () => minef
     async ({ itemName, destination = 'hand' }) => {
       const bot = getBot();
       const items = bot.inventory.items();
-      const item = items.find((item: any) =>
+      const item = items.find((item) =>
         item.name.includes(itemName.toLowerCase())
       );
 

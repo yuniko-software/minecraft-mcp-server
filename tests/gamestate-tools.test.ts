@@ -4,6 +4,7 @@ import { registerGameStateTools } from '../src/tools/gamestate-tools.js';
 import { ToolFactory } from '../src/tool-factory.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BotConnection } from '../src/bot-connection.js';
+import type mineflayer from 'mineflayer';
 
 test('registerGameStateTools registers detect-gamemode tool', (t) => {
   const mockServer = {
@@ -13,8 +14,8 @@ test('registerGameStateTools registers detect-gamemode tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerGameStateTools(factory, getBot);
 
@@ -38,8 +39,8 @@ test('detect-gamemode returns creative mode', async (t) => {
     game: {
       gameMode: 'creative'
     }
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerGameStateTools(factory, getBot);
 
@@ -65,8 +66,8 @@ test('detect-gamemode returns survival mode', async (t) => {
     game: {
       gameMode: 'survival'
     }
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerGameStateTools(factory, getBot);
 
@@ -92,8 +93,8 @@ test('detect-gamemode returns adventure mode', async (t) => {
     game: {
       gameMode: 'adventure'
     }
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerGameStateTools(factory, getBot);
 

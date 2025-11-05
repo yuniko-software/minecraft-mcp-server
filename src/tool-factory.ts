@@ -7,22 +7,21 @@ type McpResponse = {
   [key: string]: unknown;
 };
 
-type ToolExecutor<T = any> = (args: T) => Promise<McpResponse>;
-
 export class ToolFactory {
   constructor(
-    private server: McpServer,
-    private connection: BotConnection
+    private _server: McpServer,
+    private _connection: BotConnection
   ) {}
 
-  registerTool<T = any>(
+  registerTool(
     name: string,
     description: string,
-    schema: any,
-    executor: ToolExecutor<T>
+    schema: Record<string, unknown>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    executor: (args: any) => Promise<McpResponse>
   ): void {
-    this.server.tool(name, description, schema, async (args: any): Promise<McpResponse> => {
-      const connectionCheck = await this.connection.checkConnectionAndReconnect();
+    this._server.tool(name, description, schema, async (args: unknown): Promise<McpResponse> => {
+      const connectionCheck = await this._connection.checkConnectionAndReconnect();
 
       if (!connectionCheck.connected) {
         return {

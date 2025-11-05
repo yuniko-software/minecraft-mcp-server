@@ -23,7 +23,7 @@ function createCancellableFlightOperation(
           resolve(true);
         }
       })
-      .catch((err: any) => {
+      .catch((err: Error) => {
         if (!aborted) {
           reject(err);
         }

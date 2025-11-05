@@ -4,6 +4,7 @@ import { registerBlockTools } from '../src/tools/block-tools.js';
 import { ToolFactory } from '../src/tool-factory.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BotConnection } from '../src/bot-connection.js';
+import type mineflayer from 'mineflayer';
 import { Vec3 } from 'vec3';
 
 test('registerBlockTools registers place-block tool', (t) => {
@@ -14,8 +15,8 @@ test('registerBlockTools registers place-block tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
 
@@ -34,8 +35,8 @@ test('registerBlockTools registers dig-block tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
 
@@ -54,8 +55,8 @@ test('registerBlockTools registers get-block-info tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
 
@@ -74,8 +75,8 @@ test('registerBlockTools registers find-block tool', (t) => {
     checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
-  const mockBot = {} as any;
-  const getBot = () => mockBot;
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
 
@@ -102,8 +103,8 @@ test('get-block-info returns block information', async (t) => {
   };
   const mockBot = {
     blockAt: sinon.stub().returns(mockBlock)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
 
@@ -130,8 +131,8 @@ test('get-block-info handles missing block', async (t) => {
   
   const mockBot = {
     blockAt: sinon.stub().returns(null)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
 
@@ -158,8 +159,8 @@ test('dig-block handles air blocks', async (t) => {
   };
   const mockBot = {
     blockAt: sinon.stub().returns(mockBlock)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
 
@@ -184,8 +185,8 @@ test('find-block returns not found when block not found', async (t) => {
   const mockBot = {
     version: '1.21',
     findBlock: sinon.stub().returns(null)
-  } as any;
-  const getBot = () => mockBot;
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
 
