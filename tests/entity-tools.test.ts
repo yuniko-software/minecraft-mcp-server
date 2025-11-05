@@ -39,7 +39,7 @@ test('find-entity returns entity when found', async (t) => {
   const mockEntity = {
     name: 'zombie',
     type: 'mob',
-    position: new Vec3(5, 64, 8)  // Distance ~9.4 blocks from origin
+    position: new Vec3(5, 64, 8)
   };
   const mockBot = {
     entity: {
