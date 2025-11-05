@@ -46,8 +46,8 @@ test('fly-to successfully flies to destination', async (t) => {
     entity: {
       position: new Vec3(0, 64, 0)
     }
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+  } as unknown as mineflayer.Bot;
+  const getBot = () => mockBot;
 
   registerFlightTools(factory, getBot);
 
@@ -74,8 +74,8 @@ test('fly-to returns error when creative mode not available', async (t) => {
 
   const mockBot = {
     creative: null
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+  } as unknown as mineflayer.Bot;
+  const getBot = () => mockBot;
 
   registerFlightTools(factory, getBot);
 
@@ -107,8 +107,8 @@ test('fly-to handles flight errors', async (t) => {
     entity: {
       position: new Vec3(0, 64, 0)
     }
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+  } as unknown as mineflayer.Bot;
+  const getBot = () => mockBot;
 
   registerFlightTools(factory, getBot);
 

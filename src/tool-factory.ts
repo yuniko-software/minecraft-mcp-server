@@ -9,8 +9,8 @@ type McpResponse = {
 
 export class ToolFactory {
   constructor(
-    private _server: McpServer,
-    private _connection: BotConnection
+    private server: McpServer,
+    private connection: BotConnection
   ) {}
 
   registerTool(
@@ -20,8 +20,8 @@ export class ToolFactory {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     executor: (args: any) => Promise<McpResponse>
   ): void {
-    this._server.tool(name, description, schema, async (args: unknown): Promise<McpResponse> => {
-      const connectionCheck = await this._connection.checkConnectionAndReconnect();
+    this.server.tool(name, description, schema, async (args: unknown): Promise<McpResponse> => {
+      const connectionCheck = await this.connection.checkConnectionAndReconnect();
 
       if (!connectionCheck.connected) {
         return {

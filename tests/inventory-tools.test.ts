@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { registerInventoryTools } from '../src/tools/inventory-tools.js';
 import { ToolFactory } from '../src/tool-factory.js';
 import { BotConnection } from '../src/bot-connection.js';
-import type { Server as McpServer } from '@modelcontextprotocol/sdk/server/index.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type mineflayer from 'mineflayer';
 
 test('registerInventoryTools registers list-inventory tool', (t) => {
@@ -59,8 +59,8 @@ test('list-inventory returns empty when no items', async (t) => {
     inventory: {
       items: () => []
     }
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+  } as unknown as mineflayer.Bot;
+  const getBot = () => mockBot;
 
   registerInventoryTools(factory, getBot);
 
@@ -89,8 +89,8 @@ test('list-inventory returns items with counts', async (t) => {
         { name: 'cobblestone', count: 64, slot: 1 }
       ]
     }
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+  } as unknown as mineflayer.Bot;
+  const getBot = () => mockBot;
 
   registerInventoryTools(factory, getBot);
 
@@ -122,8 +122,8 @@ test('equip-item calls bot.equip', async (t) => {
       ]
     },
     equip: equipStub
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+  } as unknown as mineflayer.Bot;
+  const getBot = () => mockBot;
 
   registerInventoryTools(factory, getBot);
 
@@ -151,8 +151,8 @@ test('equip-item returns message when item not found', async (t) => {
     inventory: {
       items: () => []
     }
-  } as Partial<mineflayer.Bot>;
-  const getBot = () => mockBot as mineflayer.Bot;
+  } as unknown as mineflayer.Bot;
+  const getBot = () => mockBot;
 
   registerInventoryTools(factory, getBot);
 

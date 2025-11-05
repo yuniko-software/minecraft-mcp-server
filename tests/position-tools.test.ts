@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { registerPositionTools } from '../src/tools/position-tools.js';
 import { ToolFactory } from '../src/tool-factory.js';
 import { BotConnection } from '../src/bot-connection.js';
-import type { Server as McpServer } from '@modelcontextprotocol/sdk/server/index.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type mineflayer from 'mineflayer';
 import { Vec3 } from 'vec3';
 
