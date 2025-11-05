@@ -1,38 +1,38 @@
-import { defineConfig } from "eslint/config";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
+import js from "@eslint/js";
 import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import { defineConfig } from "eslint/config";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
-});
+const avaPlugin = await import("eslint-plugin-ava");
 
-export default defineConfig([{
-    extends: compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended"),
+export default defineConfig([
+    js.configs.recommended,
 
-    plugins: {
-        "@typescript-eslint": typescriptEslint,
-    },
-
-    languageOptions: {
-        globals: {
-            ...globals.node,
+    {
+        files: ["src/**/*.ts", "tests/**/*.ts"],
+        languageOptions: {
+            parser: tsParser,
+            parserOptions: {
+                project: "./tsconfig.json",
+                tsconfigRootDir: process.cwd(),
+            },
+            sourceType: "module",
+            globals: {
+                ...globals.node,
+            },
         },
-
-        parser: tsParser,
-        ecmaVersion: 2022,
-        sourceType: "module",
+        plugins: {
+            "@typescript-eslint": tsPlugin,
+            ava: avaPlugin.default,
+        },
+        rules: {
+            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+            "@typescript-eslint/explicit-module-boundary-types": "off",
+            "no-console": "off",
+            "ava/no-only-test": "error",
+            "ava/no-skip-test": "warn",
+        },
     },
-
-    rules: {
-        "@typescript-eslint/no-explicit-any": "warn",
-    },
-}]);
+]);
