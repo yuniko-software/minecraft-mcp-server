@@ -17,6 +17,7 @@
   "scripts": {
     "dev": "node --loader=ts-node/esm src/main.ts",
     "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
     "start": "node dist/main.js",
     "test": "ava",
     "lint": "eslint \"{src,tests}/**/*.ts\"",
