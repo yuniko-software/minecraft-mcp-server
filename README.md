@@ -1,11 +1,13 @@
 # Minecraft MCP Server
 
 <a href="https://github.com/yuniko-software/minecraft-mcp-server/actions">
-  <img alt="CI" src="https://github.com/yuniko-software/minecraft-mcp-server/workflows/CI/badge.svg">
+  <img alt="CI" src="https://github.com/yuniko-software/minecraft-mcp-server/actions/workflows/build.yml/badge.svg">
 </a>
 <a href="https://github.com/yuniko-software">
   <img alt="Contribution Welcome" src="https://img.shields.io/badge/Contribution-Welcome-blue">
 </a>
+
+___
 
 > [!IMPORTANT]
 > Currently supports Minecraft version 1.21.8. Newer versions may not work with this MCP server, but we will add support as soon as possible.
@@ -65,7 +67,7 @@ Make sure Minecraft game is running and the world is opened to LAN. Then start C
 
 It could take some time for Claude Desktop to boot the MCP server. The marker that the server has booted successfully:
 
-![image](https://github.com/user-attachments/assets/39211d34-c3b3-46d6-bc80-353fd4fba690)
+<img width="885" height="670" alt="image" src="https://github.com/user-attachments/assets/ccbb42f8-6544-462c-8ac1-8af13ddfcddd" />
 
 You can give bot any commands through any active Claude Desktop chat. You can also upload images of buildings and ask bot to build them 😁
 
@@ -120,4 +122,4 @@ To get started with contributing, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ⭐ If you find this project useful, please consider giving it a star on GitHub! ⭐
 
-Your support helps make this project more visible to other developers who might benefit from it.
+Your support helps make this project more visible to other people who might benefit from it.
