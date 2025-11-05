@@ -20,3 +20,6 @@ pids/
 
 # REPL history
 .node_repl_history
+
+# Claude Code configuration
+.claude
