@@ -1,6 +1,16 @@
 # Minecraft MCP Server
 
-> ⚠️ **CLAUDE DESKTOP DUAL LAUNCH WARNING**: Claude Desktop may sometimes launch MCP servers twice ([known issue](https://github.com/modelcontextprotocol/servers/issues/812)), which can lead to incorrect behavior of this MCP server. If you experience issues, restart Claude Desktop application to fix the problem. Alternatively, consider using other MCP clients.
+<a href="https://github.com/yuniko-software/minecraft-mcp-server/actions">
+  <img alt="CI" src="https://github.com/yuniko-software/minecraft-mcp-server/actions/workflows/build.yml/badge.svg">
+</a>
+<a href="https://github.com/yuniko-software">
+  <img alt="Contribution Welcome" src="https://img.shields.io/badge/Contribution-Welcome-blue">
+</a>
+
+___
+
+> [!IMPORTANT]
+> Currently supports Minecraft version 1.21.8. Newer versions may not work with this MCP server, but we will add support as soon as possible.
 
 https://github.com/user-attachments/assets/6f17f329-3991-4bc7-badd-7cde9aacb92f
 
@@ -13,7 +23,7 @@ A Minecraft bot powered by large language models and [Mineflayer API](https://gi
 ## Prerequisites
 
 - Git
-- Node.js
+- Node.js (>= 20.10.0)
 - A running Minecraft game (the setup below was tested with Minecraft 1.21.8 Java Edition included in Microsoft Game Pass)
 - An MCP-compatible client. Claude Desktop will be used as an example, but other MCP clients are also supported
 
@@ -57,13 +67,13 @@ Make sure Minecraft game is running and the world is opened to LAN. Then start C
 
 It could take some time for Claude Desktop to boot the MCP server. The marker that the server has booted successfully:
 
-![image](https://github.com/user-attachments/assets/39211d34-c3b3-46d6-bc80-353fd4fba690)
+<img width="885" height="670" alt="image" src="https://github.com/user-attachments/assets/ccbb42f8-6544-462c-8ac1-8af13ddfcddd" />
 
 You can give bot any commands through any active Claude Desktop chat. You can also upload images of buildings and ask bot to build them 😁
 
 Don't forget to mention that bot should do something in Minecraft in your prompt. Because saying this is a trigger to run MCP server. It will ask for your permissions.
 
-Using Claude 4.0 Sonnet could give you some interesting results. The bot-agent would be really smart 🫡
+Using Claude Sonnet could give you some interesting results. The bot-agent would be really smart 🫡
 
 Example usage: [shared Claude chat](https://claude.ai/share/535d5f69-f102-4cdb-9801-f74ea5709c0b)
 
@@ -104,13 +114,12 @@ Once connected to a Minecraft server, Claude can use these commands:
 
 ## Contributing
 
-This application was made in just two days, and the code is really simple and straightforward. All refactoring commits, functional and test contributions, issues and discussion are greatly appreciated!
-
-Feel free to submit pull requests or open issues for improvements. Some areas that could use enhancement:
-
-- Additional documentation
-- More robust error handling
-- Tests for different components
-- New functionality and commands
+Feel free to submit pull requests or open issues for improvements. All refactoring commits, functional and test contributions, issues and discussion are greatly appreciated!
 
 To get started with contributing, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
+⭐ If you find this project useful, please consider giving it a star on GitHub! ⭐
+
+Your support helps make this project more visible to other people who might benefit from it.

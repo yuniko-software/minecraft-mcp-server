@@ -2,7 +2,7 @@
 
 ## Prerequisites
 - Git
-- Node.js (>=16.0.0)
+- Node.js (>=20.10.0)
 - A running Minecraft game (tested with Minecraft 1.21.8 Java Edition)
 - Claude Desktop (or another MCP-compatible client)
 
@@ -85,6 +85,17 @@ Update your MCP configuration to use your fork and branch:
 3. Restart your MCP client completely (for Claude Desktop, close from system tray)
 4. Open your MCP client - it will automatically pull and run your latest changes
 5. Test your changes through your client's chat interface
+
+### 7. Debugging with MCP Inspector
+
+The [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) is an excellent tool for debugging and testing your MCP server during development. It provides a user-friendly interface to:
+
+- Test individual tools without needing a full MCP client
+- Inspect requests and responses
+- Debug connection issues
+- Validate tool schemas and responses
+
+To use the MCP Inspector with your development branch, follow the guide at: https://modelcontextprotocol.io/docs/tools/inspector
 
 ## Submitting Changes
 

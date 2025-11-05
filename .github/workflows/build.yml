@@ -1,4 +1,4 @@
-name: Build and Lint
+name: CI Build
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
-    - name: Use Node.js
+    - name: Setup Node.js
       uses: actions/setup-node@v6
       with:
         node-version: '22.x'
@@ -23,7 +23,13 @@ jobs:
       run: npm ci
 
     - name: Lint
-      run: npx eslint "src/**/*.ts" --max-warnings=100
+      run: npm run lint
+
+    - name: TypeCheck
+      run: npx tsc --noEmit
 
     - name: Build
       run: npm run build
+
+    - name: Test
+      run: npm test
