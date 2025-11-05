@@ -7,7 +7,7 @@ test('constructor initializes with correct state', (t) => {
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  t.is(connection.getState(), 'connecting');
+  t.is(connection.getState(), 'disconnected');
   t.deepEqual(connection.getConfig(), config);
   t.is(connection.getBot(), null);
   t.false(connection.isConnected());
@@ -19,7 +19,7 @@ test('constructor accepts custom reconnect delay', (t) => {
   const customDelay = 5000;
   const connection = new BotConnection(config, callbacks, customDelay);
 
-  t.is(connection.getState(), 'connecting');
+  t.is(connection.getState(), 'disconnected');
 });
 
 test('getState returns current state', (t) => {
@@ -27,7 +27,7 @@ test('getState returns current state', (t) => {
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
 
-  t.is(connection.getState(), 'connecting');
+  t.is(connection.getState(), 'disconnected');
 });
 
 test('getConfig returns configuration', (t) => {
@@ -49,7 +49,7 @@ test('getBot returns null initially', (t) => {
   t.is(connection.getBot(), null);
 });
 
-test('isConnected returns false when state is connecting', (t) => {
+test('isConnected returns false when state is disconnected', (t) => {
   const config = { host: 'localhost', port: 25565, username: 'TestBot' };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
@@ -119,6 +119,8 @@ test('checkConnectionAndReconnect returns message when connecting', async (t) =>
   const config = { host: 'localhost', port: 25565, username: 'TestBot' };
   const callbacks = { onLog: sinon.stub(), onChatMessage: sinon.stub() };
   const connection = new BotConnection(config, callbacks);
+
+  (connection as unknown as { state: string }).state = 'connecting';
 
   const result = await connection.checkConnectionAndReconnect();
 

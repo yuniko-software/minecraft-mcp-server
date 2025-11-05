@@ -20,7 +20,7 @@ interface ConnectionCallbacks {
 
 export class BotConnection {
   private bot: mineflayer.Bot | null = null;
-  private state: ConnectionState = 'connecting';
+  private state: ConnectionState = 'disconnected';
   private config: BotConfig;
   private callbacks: ConnectionCallbacks;
   private isReconnecting = false;
@@ -67,6 +67,7 @@ export class BotConnection {
   private registerEventHandlers(bot: mineflayer.Bot): void {
     bot.once('spawn', async () => {
       this.state = 'connected';
+      this.callbacks.onLog('info', 'Bot spawned in world');
 
       const mcData = minecraftData(bot.version);
       const defaultMove = new Movements(bot, mcData);
@@ -100,10 +101,6 @@ export class BotConnection {
 
     bot.on('login', () => {
       this.callbacks.onLog('info', 'Bot logged in successfully');
-    });
-
-    bot.on('spawn', () => {
-      this.callbacks.onLog('info', 'Bot spawned in world');
     });
 
     bot.on('end', (reason) => {
