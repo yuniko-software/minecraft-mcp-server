@@ -25,6 +25,9 @@ export class MessageStore {
   }
 
   getRecentMessages(count: number = 10): StoredMessage[] {
+    if (count <= 0) {
+      return [];
+    }
     return this.messages.slice(-count);
   }
 
