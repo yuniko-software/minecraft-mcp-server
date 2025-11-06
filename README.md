@@ -6,6 +6,11 @@
 <a href="https://github.com/yuniko-software">
   <img alt="Contribution Welcome" src="https://img.shields.io/badge/Contribution-Welcome-blue">
 </a>
+<a href="https://github.com/yuniko-software/minecraft-mcp-server/releases/latest">
+  <img alt="Latest Release" src="https://img.shields.io/github/v/release/yuniko-software/minecraft-mcp-server?label=Latest%20Release">
+</a>
+
+<img width="2063" height="757" alt="image" src="https://github.com/user-attachments/assets/3f0f0438-f079-4226-90bd-87b9e1311d19" />
 
 ___
 
