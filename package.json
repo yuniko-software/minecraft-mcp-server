@@ -15,7 +15,7 @@
     ]
   },
   "scripts": {
-    "dev": "node --loader=ts-node/esm src/main.ts",
+    "dev": "tsx src/main.ts",
     "build": "tsc -p tsconfig.build.json",
     "prepare": "npm run build",
     "start": "node dist/main.js",
