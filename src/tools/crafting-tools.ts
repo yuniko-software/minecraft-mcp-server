@@ -94,7 +94,8 @@ function parseRecipeIngredientOptions(recipe: unknown, itemsById: McDataItemsByI
 }
 
 function formatOptionsLabel(options: string[]): string {
-  if (options.length <= 1) return options[0] ?? 'unknown';
+  if (options.length === 0) return 'unresolved ingredient (no options found)';
+  if (options.length === 1) return options[0];
 
   const shown = options.slice(0, 3).join(', ');
   const suffix = options.length > 3 ? ', …' : '';
@@ -238,7 +239,7 @@ function getRecipeResult(recipe: unknown, itemsById: McDataItemsById): { name: s
     return name ? { name, count: 1 } : null;
   }
 
-  if (typeof result === 'object' && result !== null) {
+  if (result && typeof result === 'object') {
     const resultObj = result as Record<string, unknown>;
     const name = resolveItemName(resultObj, itemsById);
     const count = typeof resultObj.count === 'number' && Number.isFinite(resultObj.count) ? resultObj.count : 1;
