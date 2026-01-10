@@ -125,7 +125,21 @@ test('can-craft with empty inventory returns missing items', async (t) => {
 
   const result = await executor({ itemName: 'stick' });
 
-  t.true(result.content[0].text.includes('Cannot') || result.content[0].text.includes('No recipe') || result.content[0].text.includes('Missing'));
+  const mcData = minecraftData('1.21.8');
+  const recipes = flattenRecipes((mcData as unknown as { recipes: unknown }).recipes);
+  const stickId = (mcData as unknown as { itemsByName: Record<string, { id: number }> }).itemsByName.stick.id;
+  const stickRecipe = recipes.find((recipe) => {
+    const r = recipe as Record<string, unknown>;
+    const res = r.result as Record<string, unknown> | undefined;
+    return !!res && typeof res.id === 'number' && res.id === stickId;
+  });
+  t.truthy(stickRecipe);
+  const ingredientCounts = countRecipeIngredients(mcData, stickRecipe);
+  const ingredientNames = Object.keys(ingredientCounts);
+
+  const text = result.content[0].text.toLowerCase();
+  t.true(text.includes('cannot craft'));
+  t.true(ingredientNames.some(n => text.includes(n.toLowerCase())));
 });
 
 test('get-recipe returns recipe structure for valid item', async (t) => {
@@ -153,8 +167,21 @@ test('get-recipe returns recipe structure for valid item', async (t) => {
 
   const result = await executor({ itemName: 'stick' });
 
-  // Should return either a recipe or "No recipes found" message
-  t.true(result.content[0].text.length > 0);
+  const mcData = minecraftData('1.21.8');
+  const recipes = flattenRecipes((mcData as unknown as { recipes: unknown }).recipes);
+  const stickId = (mcData as unknown as { itemsByName: Record<string, { id: number }> }).itemsByName.stick.id;
+  const stickRecipe = recipes.find((recipe) => {
+    const r = recipe as Record<string, unknown>;
+    const res = r.result as Record<string, unknown> | undefined;
+    return !!res && typeof res.id === 'number' && res.id === stickId;
+  });
+  t.truthy(stickRecipe);
+  const ingredientCounts = countRecipeIngredients(mcData, stickRecipe);
+  const ingredientNames = Object.keys(ingredientCounts);
+
+  const text = result.content[0].text.toLowerCase();
+  t.true(text.includes('ingredients'));
+  t.true(ingredientNames.some(n => text.includes(n.toLowerCase())));
   t.true(Array.isArray(result.content));
 });
 
@@ -167,12 +194,11 @@ test('list-recipes returns proper structure', async (t) => {
   } as unknown as BotConnection;
   const factory = new ToolFactory(mockServer, mockConnection);
 
-  // Mock with some wood to craft sticks
   const mockBot = {
     version: '1.21.8',
     inventory: {
       items: () => [
-        { name: 'oak_wood', count: 64, slot: 0 }
+        { name: 'oak_planks', count: 64, slot: 0 }
       ]
     }
   } as unknown as mineflayer.Bot;
@@ -186,7 +212,9 @@ test('list-recipes returns proper structure', async (t) => {
 
   const result = await executor({ outputItem: undefined });
 
-  t.true(result.content[0].text.length > 0);
+  const text = result.content[0].text.toLowerCase();
+  t.true(text.length > 0);
+  t.true(text.includes('stick'));
   t.true(Array.isArray(result.content));
 });
 
@@ -215,8 +243,8 @@ test('craft-item returns error when recipe not available', async (t) => {
 
   const result = await executor({ outputItem: 'stick', amount: 1 });
 
-  // Should return either success or error response with valid text
   t.true(result.content[0].text.length > 0);
+  t.true(!!result.isError);
   t.true(Array.isArray(result.content));
 });
 
@@ -263,7 +291,6 @@ test('uses real minecraft-data recipes for version 1.21.8', async (t) => {
   const mcData = minecraftData('1.21.8');
   
   t.truthy(mcData.recipes);
-  // recipes can be a map or array, just verify it exists and has content
   const isValid = mcData.recipes && (Array.isArray(mcData.recipes) || typeof mcData.recipes === 'object');
   t.true(isValid);
 });

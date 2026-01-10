@@ -69,7 +69,6 @@ function parseRecipeIngredientOptions(recipe: unknown, itemsById: McDataItemsByI
     else counts.set(key, { options: [...options], count: 1 });
   };
 
-  // Prefer inShape if present.
   if (Array.isArray(r.inShape)) {
     const counts = new Map<string, { options: string[]; count: number }>();
     for (const row of r.inShape as unknown[]) {
@@ -187,7 +186,6 @@ function parseRecipeIngredients(recipe: unknown, itemsById: McDataItemsById): Re
 
   const r = recipe as Record<string, unknown>;
 
-  // Handle inShape format (2D array)
   if (Array.isArray(r.inShape)) {
     const countMap: Record<string, number> = {};
     for (const row of r.inShape as unknown[]) {
@@ -204,12 +202,9 @@ function parseRecipeIngredients(recipe: unknown, itemsById: McDataItemsById): Re
       ingredients.push({ name, count });
     }
 
-    // minecraft-data recipes should not contain both inShape and ingredients.
-    // If they do, prefer inShape to avoid double-counting.
     if (ingredients.length > 0) return ingredients;
   }
 
-  // Handle ingredients array
   if (Array.isArray(r.ingredients)) {
     const countMap: Record<string, number> = {};
     for (const ingredient of r.ingredients as unknown[]) {
@@ -286,14 +281,12 @@ function collectCandidateRecipesFromBot(
     }
   };
 
-  // Exact item-name match first (avoids stick -> sticky_piston).
   const exactEntry = itemsByName[q];
   if (exactEntry && typeof exactEntry.id === 'number') {
     pushRecipesFor(q, exactEntry.id, true);
     return exact;
   }
 
-  // Otherwise, partial matches.
   for (const [name, meta] of Object.entries(itemsByName)) {
     const match = classifyNameMatch(name, q);
     if (!match.partial) continue;
@@ -346,7 +339,7 @@ export function registerCraftingTools(factory: ToolFactory, getBot: () => minefl
     "list-recipes",
     "List all available crafting recipes the bot can make with current inventory",
     {
-      outputItem: z.string().optional().describe("Optional: filter recipes by output item name")
+      outputItem: z.string().trim().min(1).optional().describe("Optional: filter recipes by output item name")
     },
     async ({ outputItem }) => {
       const bot = getBot();
@@ -406,14 +399,10 @@ export function registerCraftingTools(factory: ToolFactory, getBot: () => minefl
     "craft-item",
     "Craft an item using a crafting recipe",
     {
-      outputItem: z.string().describe("Name of the item to craft"),
+      outputItem: z.string().trim().min(1).describe("Name of the item to craft"),
       amount: z.number().int().min(1).optional().describe("Number of times to craft (default: 1)")
     },
     async ({ outputItem, amount = 1 }) => {
-      if (!Number.isFinite(amount) || amount < 1) {
-        return factory.createErrorResponse("amount must be a positive integer");
-      }
-
       const outputQuery = normalizeItemName(outputItem);
 
       const bot = getBot();
@@ -428,13 +417,14 @@ export function registerCraftingTools(factory: ToolFactory, getBot: () => minefl
       let craftedCount = 0;
       let lastError = "";
 
+      const table = findNearbyCraftingTable(bot, mcData);
+      const candidatesFromBotNoTable = collectCandidateRecipesFromBot(bot, mcData, outputQuery, itemsById, null);
+      const candidatesFromBotWithTable = table ? collectCandidateRecipesFromBot(bot, mcData, outputQuery, itemsById, table) : [];
+      const candidatesFromBot = candidatesFromBotNoTable.length > 0 ? candidatesFromBotNoTable : candidatesFromBotWithTable;
+      const candidates = candidatesFromBot.length > 0 ? candidatesFromBot : collectCandidateRecipes(recipes, outputQuery, itemsById);
+
       for (let attempt = 0; attempt < amount; attempt++) {
         const currentInventory = bot.inventory.items().map(item => ({ name: item.name, count: item.count }));
-        const table = findNearbyCraftingTable(bot, mcData);
-        const candidatesFromBotNoTable = collectCandidateRecipesFromBot(bot, mcData, outputQuery, itemsById, null);
-        const candidatesFromBotWithTable = table ? collectCandidateRecipesFromBot(bot, mcData, outputQuery, itemsById, table) : [];
-        const candidatesFromBot = candidatesFromBotNoTable.length > 0 ? candidatesFromBotNoTable : candidatesFromBotWithTable;
-        const candidates = candidatesFromBot.length > 0 ? candidatesFromBot : collectCandidateRecipes(recipes, outputQuery, itemsById);
         let craftedThisAttempt = false;
         let bestCannotCraft: { missingTotal: number; message: string } | null = null;
 
@@ -492,7 +482,7 @@ export function registerCraftingTools(factory: ToolFactory, getBot: () => minefl
     "get-recipe",
     "Get detailed information about a specific recipe",
     {
-      itemName: z.string().describe("Name of the item to get recipe for")
+      itemName: z.string().trim().min(1).describe("Name of the item to get recipe for")
     },
     async ({ itemName }) => {
       const bot = getBot();
@@ -552,7 +542,7 @@ export function registerCraftingTools(factory: ToolFactory, getBot: () => minefl
     "can-craft",
     "Check if the bot can craft a specific item with current inventory",
     {
-      itemName: z.string().describe("Name of the item to check")
+      itemName: z.string().trim().min(1).describe("Name of the item to check")
     },
     async ({ itemName }) => {
       const bot = getBot();
