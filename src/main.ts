@@ -15,6 +15,7 @@ import { registerEntityTools } from './tools/entity-tools.js';
 import { registerChatTools } from './tools/chat-tools.js';
 import { registerFlightTools } from './tools/flight-tools.js';
 import { registerGameStateTools } from './tools/gamestate-tools.js';
+import { registerCraftingTools } from './tools/crafting-tools.js';
 
 setupStdioFiltering();
 
@@ -42,7 +43,7 @@ async function main() {
 
   const server = new McpServer({
     name: "minecraft-mcp-server",
-    version: "2.0.0"
+    version: "2.0.1"
   });
 
   const factory = new ToolFactory(server, connection);
@@ -55,6 +56,7 @@ async function main() {
   registerChatTools(factory, getBot, messageStore);
   registerFlightTools(factory, getBot);
   registerGameStateTools(factory, getBot);
+  registerCraftingTools(factory, getBot);
 
   process.stdin.on('end', () => {
     connection.cleanup();
