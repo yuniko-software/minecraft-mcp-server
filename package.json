@@ -24,7 +24,7 @@
     "lint:fix": "eslint \"{src,tests}/**/*.ts\" --fix"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "minecraft-data": "^3.101.0",
     "mineflayer": "^4.33.0",
     "mineflayer-pathfinder": "^2.4.2",
