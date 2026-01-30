@@ -3,7 +3,7 @@ import pathfinderPkg from 'mineflayer-pathfinder';
 const { pathfinder, Movements } = pathfinderPkg;
 import minecraftData from 'minecraft-data';
 
-const SUPPORTED_MINECRAFT_VERSION = '1.21.8';
+const SUPPORTED_MINECRAFT_VERSION = '1.21.10';
 
 type ConnectionState = 'connected' | 'connecting' | 'disconnected';
 
