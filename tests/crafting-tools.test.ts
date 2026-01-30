@@ -110,7 +110,7 @@ test('can-craft with empty inventory returns missing items', async (t) => {
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const mockBot = {
-    version: '1.21.8',
+    version: '1.21.10',
     inventory: {
       items: () => []
     }
