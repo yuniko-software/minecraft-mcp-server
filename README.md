@@ -15,7 +15,7 @@
 ___
 
 > [!IMPORTANT]
-> Currently supports Minecraft version 1.21.8. Newer versions may not work with this MCP server, but we will add support as soon as possible.
+> Currently supports Minecraft version 1.21.10. Newer versions may not work with this MCP server, but we will add support as soon as possible.
 
 https://github.com/user-attachments/assets/6f17f329-3991-4bc7-badd-7cde9aacb92f
 
