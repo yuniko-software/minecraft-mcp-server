@@ -31,13 +31,48 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
       x: z.number().describe("X coordinate"),
       y: z.number().describe("Y coordinate"),
       z: z.number().describe("Z coordinate"),
-      range: z.number().optional().describe("How close to get to the target (default: 1)")
+      range: z.number().optional().describe("How close to get to the target (default: 1)"),
+      timeoutMs: z.number().optional().describe("Timeout in milliseconds before cancelling (default: no timeout)")
     },
-    async ({ x, y, z, range = 1 }) => {
+    async ({ x, y, z, range = 1, timeoutMs }: { x: number; y: number; z: number; range?: number; timeoutMs?: number }) => {
       const bot = getBot();
       const goal = new goals.GoalNear(x, y, z, range);
-      await bot.pathfinder.goto(goal);
-      return factory.createResponse(`Successfully moved to position near (${x}, ${y}, ${z})`);
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+      let timeoutPromise: Promise<never> | null = null;
+      let timedOut = false;
+
+      if (timeoutMs && timeoutMs > 0) {
+        timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => {
+            timedOut = true;
+            reject(new Error(`Move timed out after ${timeoutMs}ms`));
+          }, timeoutMs);
+        });
+      }
+
+      const gotoPromise = bot.pathfinder.goto(goal);
+
+      try {
+        if (timeoutPromise) {
+          await Promise.race([gotoPromise, timeoutPromise]);
+        } else {
+          await gotoPromise;
+        }
+        return factory.createResponse(`Successfully moved to position near (${x}, ${y}, ${z})`);
+      } catch (error) {
+        if (timedOut) {
+          throw new Error(`Move timed out after ${timeoutMs}ms`);
+        }
+        throw error;
+      } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        bot.pathfinder.stop();
+        if (timedOut) {
+          gotoPromise.catch(() => {});
+        }
+      }
     }
   );
 
