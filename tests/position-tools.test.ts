@@ -87,7 +87,11 @@ test('move-to-position returns error when pathfinding fails', async (t) => {
 
   const mockBot = {
     pathfinder: {
-      goto: sinon.stub().rejects(new Error('Cannot find path'))
+      goto: sinon.stub().rejects(new Error('Cannot find path')),
+      stop: sinon.stub()
+    },
+    entity: {
+      position: new Vec3(10, 20, 30)
     }
   } as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
