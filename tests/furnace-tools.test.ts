@@ -103,3 +103,45 @@ test('smelt-item loads input and fuel and takes output', async (t) => {
   t.true((furnace.putFuel as sinon.SinonStub).calledOnce);
   t.true((furnace.takeOutput as sinon.SinonStub).calledOnce);
 });
+
+test('smelt-item returns validation error for non-positive counts', async (t) => {
+  const mockServer = { tool: sinon.stub() } as unknown as McpServer;
+  const mockConnection = {
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+  } as unknown as BotConnection;
+  const factory = new ToolFactory(mockServer, mockConnection);
+  const mockBot = {} as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
+
+  registerFurnaceTools(factory, getBot);
+
+  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const smeltCall = toolCalls.find(call => call.args[0] === 'smelt-item');
+  const executor = smeltCall!.args[3];
+
+  const inputCountResult = await executor({
+    x: 1,
+    y: 2,
+    z: 3,
+    inputItem: 'iron_ore',
+    inputCount: 0,
+    fuelItem: 'coal',
+    fuelCount: 1
+  });
+
+  t.true(inputCountResult.isError);
+  t.true(inputCountResult.content[0].text.includes('inputCount must be a positive integer'));
+
+  const fuelCountResult = await executor({
+    x: 1,
+    y: 2,
+    z: 3,
+    inputItem: 'iron_ore',
+    inputCount: 1,
+    fuelItem: 'coal',
+    fuelCount: -1
+  });
+
+  t.true(fuelCountResult.isError);
+  t.true(fuelCountResult.content[0].text.includes('fuelCount must be a positive integer'));
+});

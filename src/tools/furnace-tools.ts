@@ -15,11 +15,11 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       y: z.number().describe("Y coordinate"),
       z: z.number().describe("Z coordinate"),
       inputItem: z.string().describe("Name of item to smelt"),
-      inputCount: z.number().optional().describe("Amount of input to smelt (default: 1)"),
+      inputCount: z.number().int().positive().optional().describe("Amount of input to smelt (default: 1)"),
       fuelItem: z.string().describe("Name of fuel item"),
-      fuelCount: z.number().optional().describe("Amount of fuel to use (default: 1)"),
+      fuelCount: z.number().int().positive().optional().describe("Amount of fuel to use (default: 1)"),
       takeOutput: z.boolean().optional().describe("Whether to take output when ready (default: true)"),
-      timeoutMs: z.number().optional().describe("Timeout waiting for output in ms (default: 60000)")
+      timeoutMs: z.number().int().positive().optional().describe("Timeout waiting for output in ms (default: 60000)")
     },
     async ({
       x,
@@ -43,6 +43,16 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       timeoutMs?: number;
     }) => {
       const bot = getBot();
+      if (inputCount <= 0) {
+        return factory.createErrorResponse('inputCount must be a positive integer');
+      }
+      if (fuelCount <= 0) {
+        return factory.createErrorResponse('fuelCount must be a positive integer');
+      }
+      if (timeoutMs <= 0) {
+        return factory.createErrorResponse('timeoutMs must be a positive integer');
+      }
+
       const furnacePos = new Vec3(x, y, z);
       const furnaceBlock = bot.blockAt(furnacePos);
 
