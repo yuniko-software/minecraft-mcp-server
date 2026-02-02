@@ -8,6 +8,14 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type mineflayer from 'mineflayer';
 import type { Item } from 'prismarine-item';
 
+const createMockItem = (fields: {
+  name: string;
+  count: number;
+  type: number;
+  metadata: number;
+  slot?: number;
+}): Item => fields as unknown as Item;
+
 test('registerFurnaceTools registers smelt-item tool', (t) => {
   const mockServer = { tool: sinon.stub() } as unknown as McpServer;
   const mockConnection = {
@@ -62,7 +70,13 @@ test('smelt-item loads input and fuel and takes output', async (t) => {
   const factory = new ToolFactory(mockServer, mockConnection);
 
   const furnace = new EventEmitter() as mineflayer.Furnace & EventEmitter;
-  const outputItem: Item = { name: 'iron_ingot', count: 1, type: 100, metadata: null, slot: 0 } as Item;
+  const outputItem = createMockItem({
+    name: 'iron_ingot',
+    count: 1,
+    type: 100,
+    metadata: 0,
+    slot: 0
+  });
 
   furnace.putInput = sinon.stub().resolves();
   furnace.putFuel = sinon.stub().resolves();
@@ -77,11 +91,11 @@ test('smelt-item loads input and fuel and takes output', async (t) => {
     openFurnace: sinon.stub().resolves(furnace),
     inventory: {
       items: () => [
-        { name: 'iron_ore', count: 3, type: 15, metadata: null },
-        { name: 'coal', count: 2, type: 263, metadata: null }
+        createMockItem({ name: 'iron_ore', count: 3, type: 15, metadata: 0 }),
+        createMockItem({ name: 'coal', count: 2, type: 263, metadata: 0 })
       ]
     }
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerFurnaceTools(factory, getBot);
