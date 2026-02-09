@@ -125,18 +125,6 @@ test('can-craft with empty inventory returns missing items', async (t) => {
 
   const result = await executor({ itemName: 'stick' });
 
-  const mcData = minecraftData('1.21.8');
-  const recipes = flattenRecipes((mcData as unknown as { recipes: unknown }).recipes);
-  const stickId = (mcData as unknown as { itemsByName: Record<string, { id: number }> }).itemsByName.stick.id;
-  const stickRecipe = recipes.find((recipe) => {
-    const r = recipe as Record<string, unknown>;
-    const res = r.result as Record<string, unknown> | undefined;
-    return !!res && typeof res.id === 'number' && res.id === stickId;
-  });
-  t.truthy(stickRecipe);
-  const ingredientCounts = countRecipeIngredients(mcData, stickRecipe);
-  const ingredientNames = Object.keys(ingredientCounts);
-
   const text = result.content[0].text.toLowerCase();
   t.true(text.includes('cannot craft'));
   t.true(text.includes('missing'));
