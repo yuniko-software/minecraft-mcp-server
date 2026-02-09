@@ -32,7 +32,7 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
       y: z.number().describe("Y coordinate"),
       z: z.number().describe("Z coordinate"),
       range: z.number().optional().describe("How close to get to the target (default: 1)"),
-      timeoutMs: z.number().optional().describe("Timeout in milliseconds before cancelling (default: no timeout)")
+      timeoutMs: z.number().int().min(50).optional().describe("Timeout in milliseconds before cancelling (min: 50, default: no timeout)")
     },
     async ({ x, y, z, range = 1, timeoutMs }: { x: number; y: number; z: number; range?: number; timeoutMs?: number }) => {
       const bot = getBot();
@@ -41,7 +41,7 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
       let timeoutPromise: Promise<never> | null = null;
       let timedOut = false;
 
-      if (timeoutMs && timeoutMs > 0) {
+      if (timeoutMs !== undefined) {
         timeoutPromise = new Promise((_, reject) => {
           timeoutId = setTimeout(() => {
             timedOut = true;
@@ -68,8 +68,8 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
-        bot.pathfinder.stop();
         if (timedOut) {
+          bot.pathfinder.stop();
           gotoPromise.catch(() => {});
         }
       }

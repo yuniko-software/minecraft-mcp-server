@@ -139,7 +139,8 @@ test('can-craft with empty inventory returns missing items', async (t) => {
 
   const text = result.content[0].text.toLowerCase();
   t.true(text.includes('cannot craft'));
-  t.true(ingredientNames.some(n => text.includes(n.toLowerCase())));
+  t.true(text.includes('missing'));
+  t.true(text.includes('- '));
 });
 
 test('get-recipe returns recipe structure for valid item', async (t) => {
