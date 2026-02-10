@@ -14,9 +14,9 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       x: z.number().describe("X coordinate"),
       y: z.number().describe("Y coordinate"),
       z: z.number().describe("Z coordinate"),
-      inputItem: z.string().describe("Name of item to smelt"),
+      inputItem: z.string().trim().min(1).describe("Name of item to smelt"),
       inputCount: z.number().int().positive().optional().describe("Amount of input to smelt (default: 1)"),
-      fuelItem: z.string().describe("Name of fuel item"),
+      fuelItem: z.string().trim().min(1).describe("Name of fuel item"),
       fuelCount: z.number().int().positive().optional().describe("Amount of fuel to use (default: 1)"),
       takeOutput: z.boolean().optional().describe("Whether to take output when ready (default: true)"),
       timeoutMs: z.number().int().positive().optional().describe("Timeout waiting for output in ms (default: 60000)")
