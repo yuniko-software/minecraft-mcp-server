@@ -44,7 +44,7 @@ async function main() {
 
   const server = new McpServer({
     name: "minecraft-mcp-server",
-    version: "2.0.2"
+    version: "2.0.3s"
   });
 
   const factory = new ToolFactory(server, connection);
