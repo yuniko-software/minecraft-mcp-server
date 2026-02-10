@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z, ZodError, ZodRawShape, ZodType } from "zod";
 import { BotConnection } from './bot-connection.js';
 
 type McpResponse = {
@@ -31,7 +32,10 @@ export class ToolFactory {
       }
 
       try {
-        return await executor(args);
+        const parsedArgs = this.shouldValidateSchema(schema)
+          ? this.parseArgs(schema as ZodRawShape, args)
+          : args;
+        return await executor(parsedArgs);
       } catch (error) {
         return this.createErrorResponse(error as Error);
       }
@@ -50,5 +54,36 @@ export class ToolFactory {
       content: [{ type: "text", text: `Failed: ${errorMessage}` }],
       isError: true
     };
+  }
+
+  private shouldValidateSchema(schema: Record<string, unknown>): boolean {
+    const values = Object.values(schema);
+    if (values.length === 0) {
+      return true;
+    }
+
+    return values.every((value) => value instanceof ZodType);
+  }
+
+  private parseArgs(schema: ZodRawShape, args: unknown): unknown {
+    try {
+      return z.object(schema).passthrough().parse(args ?? {});
+    } catch (error) {
+      if (error instanceof ZodError) {
+        throw new Error(this.formatZodError(error));
+      }
+      throw error;
+    }
+  }
+
+  private formatZodError(error: ZodError): string {
+    const details = error.issues
+      .map((issue) => {
+        const path = issue.path.length > 0 ? `${issue.path.join('.')}: ` : '';
+        return `${path}${issue.message}`;
+      })
+      .join('; ');
+
+    return `Invalid tool arguments: ${details}`;
   }
 }

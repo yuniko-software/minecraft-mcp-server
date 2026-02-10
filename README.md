@@ -107,6 +107,9 @@ Once connected to a Minecraft server, Claude can use these commands:
 - `get-block-info` - Get information about a block
 - `find-block` - Find the nearest block of a specific type
 
+### Furnace
+- `smelt-item` - Smelt items using a furnace-like block
+
 ### Entity Interaction
 - `find-entity` - Find the nearest entity of a specific type
 
