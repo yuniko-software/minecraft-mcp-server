@@ -116,6 +116,7 @@ test('smelt-item loads input and fuel and takes output', async (t) => {
   t.true((furnace.putInput as sinon.SinonStub).calledOnce);
   t.true((furnace.putFuel as sinon.SinonStub).calledOnce);
   t.true((furnace.takeOutput as sinon.SinonStub).calledOnce);
+  t.true((furnace.close as sinon.SinonStub).calledOnce);
 });
 
 test('smelt-item returns validation error for non-positive counts', async (t) => {
@@ -144,7 +145,8 @@ test('smelt-item returns validation error for non-positive counts', async (t) =>
   });
 
   t.true(inputCountResult.isError);
-  t.true(inputCountResult.content[0].text.includes('inputCount must be a positive integer'));
+  t.true(inputCountResult.content[0].text.includes('Invalid tool arguments'));
+  t.true(inputCountResult.content[0].text.includes('inputCount'));
 
   const fuelCountResult = await executor({
     x: 1,
@@ -157,5 +159,6 @@ test('smelt-item returns validation error for non-positive counts', async (t) =>
   });
 
   t.true(fuelCountResult.isError);
-  t.true(fuelCountResult.content[0].text.includes('fuelCount must be a positive integer'));
+  t.true(fuelCountResult.content[0].text.includes('Invalid tool arguments'));
+  t.true(fuelCountResult.content[0].text.includes('fuelCount'));
 });

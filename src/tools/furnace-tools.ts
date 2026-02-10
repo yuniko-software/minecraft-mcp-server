@@ -43,15 +43,6 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       timeoutMs?: number;
     }) => {
       const bot = getBot();
-      if (inputCount <= 0) {
-        return factory.createErrorResponse('inputCount must be a positive integer');
-      }
-      if (fuelCount <= 0) {
-        return factory.createErrorResponse('fuelCount must be a positive integer');
-      }
-      if (timeoutMs <= 0) {
-        return factory.createErrorResponse('timeoutMs must be a positive integer');
-      }
 
       const furnacePos = new Vec3(x, y, z);
       const furnaceBlock = bot.blockAt(furnacePos);
