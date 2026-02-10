@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@ava/typescript": "^6.0.0",
-    "@types/node": "^25.0.10",
+    "@types/node": "^25.2.2",
     "@types/sinon": "^21.0.0",
     "@types/vec3": "^0.1.4",
     "@types/yargs": "^17.0.35",
