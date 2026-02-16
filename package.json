@@ -42,7 +42,7 @@
     "@typescript-eslint/parser": "^8.54.0",
     "ava": "^6.4.1",
     "eslint": "^9.39.2",
-    "eslint-plugin-ava": "^15.1.0",
+    "eslint-plugin-ava": "^16.0.0",
     "globals": "^17.1.0",
     "sinon": "^21.0.1",
     "ts-node": "^10.9.2",
