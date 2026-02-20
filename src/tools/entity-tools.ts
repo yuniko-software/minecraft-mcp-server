@@ -10,7 +10,7 @@ export function registerEntityTools(factory: ToolFactory, getBot: () => Bot): vo
     "Find the nearest entity of a specific type",
     {
       type: z.string().optional().describe("Type of entity to find (empty for any entity)"),
-      maxDistance: z.number().optional().describe("Maximum search distance (default: 16)")
+      maxDistance: z.coerce.number().optional().describe("Maximum search distance (default: 16)")
     },
     async ({ type = '', maxDistance = 16 }) => {
       const bot = getBot();

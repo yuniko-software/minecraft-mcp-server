@@ -14,17 +14,31 @@ interface FaceOption {
   vector: Vec3;
 }
 
+function coerceCoordinates(x: number, y: number, z: number): { x: number; y: number; z: number } {
+  const coercedX = Number(x);
+  const coercedY = Number(y);
+  const coercedZ = Number(z);
+
+  if (!Number.isFinite(coercedX) || !Number.isFinite(coercedY) || !Number.isFinite(coercedZ)) {
+    throw new Error("x, y, and z must be valid numbers");
+  }
+
+  return { x: coercedX, y: coercedY, z: coercedZ };
+}
+
 export function registerBlockTools(factory: ToolFactory, getBot: () => mineflayer.Bot): void {
   factory.registerTool(
     "place-block",
     "Place a block at the specified position",
     {
-      x: z.number().describe("X coordinate"),
-      y: z.number().describe("Y coordinate"),
-      z: z.number().describe("Z coordinate"),
+      x: z.coerce.number().describe("X coordinate"),
+      y: z.coerce.number().describe("Y coordinate"),
+      z: z.coerce.number().describe("Z coordinate"),
       faceDirection: z.enum(['up', 'down', 'north', 'south', 'east', 'west']).optional().describe("Direction to place against (default: 'down')")
     },
     async ({ x, y, z, faceDirection = 'down' }: { x: number, y: number, z: number, faceDirection?: FaceDirection }) => {
+      ({ x, y, z } = coerceCoordinates(x, y, z));
+
       const bot = getBot();
       const placePos = new Vec3(x, y, z);
       const blockAtPos = bot.blockAt(placePos);
@@ -79,11 +93,13 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
     "dig-block",
     "Dig a block at the specified position",
     {
-      x: z.number().describe("X coordinate"),
-      y: z.number().describe("Y coordinate"),
-      z: z.number().describe("Z coordinate"),
+      x: z.coerce.number().describe("X coordinate"),
+      y: z.coerce.number().describe("Y coordinate"),
+      z: z.coerce.number().describe("Z coordinate"),
     },
     async ({ x, y, z }) => {
+      ({ x, y, z } = coerceCoordinates(x, y, z));
+
       const bot = getBot();
       const blockPos = new Vec3(x, y, z);
       const block = bot.blockAt(blockPos);
@@ -106,11 +122,13 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
     "get-block-info",
     "Get information about a block at the specified position",
     {
-      x: z.number().describe("X coordinate"),
-      y: z.number().describe("Y coordinate"),
-      z: z.number().describe("Z coordinate"),
+      x: z.coerce.number().describe("X coordinate"),
+      y: z.coerce.number().describe("Y coordinate"),
+      z: z.coerce.number().describe("Z coordinate"),
     },
     async ({ x, y, z }) => {
+      ({ x, y, z } = coerceCoordinates(x, y, z));
+
       const bot = getBot();
       const blockPos = new Vec3(x, y, z);
       const block = bot.blockAt(blockPos);
@@ -128,7 +146,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
     "Find the nearest block of a specific type",
     {
       blockType: z.string().describe("Type of block to find"),
-      maxDistance: z.number().optional().describe("Maximum search distance (default: 16)")
+      maxDistance: z.coerce.number().optional().describe("Maximum search distance (default: 16)")
     },
     async ({ blockType, maxDistance = 16 }) => {
       const bot = getBot();
