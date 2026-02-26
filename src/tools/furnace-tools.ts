@@ -3,6 +3,7 @@ import mineflayer from 'mineflayer';
 import type { Item } from 'prismarine-item';
 import { Vec3 } from 'vec3';
 import { ToolFactory } from '../tool-factory.js';
+import { coerceCoordinates } from './coordinate-utils.js';
 
 const FURNACE_BLOCKS = new Set(['furnace', 'blast_furnace', 'smoker']);
 
@@ -11,9 +12,9 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
     "smelt-item",
     "Smelt items using a furnace-like block",
     {
-      x: z.number().describe("X coordinate"),
-      y: z.number().describe("Y coordinate"),
-      z: z.number().describe("Z coordinate"),
+      x: z.coerce.number().describe("X coordinate"),
+      y: z.coerce.number().describe("Y coordinate"),
+      z: z.coerce.number().describe("Z coordinate"),
       inputItem: z.string().trim().min(1).describe("Name of item to smelt"),
       inputCount: z.number().int().positive().optional().describe("Amount of input to smelt (default: 1)"),
       fuelItem: z.string().trim().min(1).describe("Name of fuel item"),
@@ -42,6 +43,8 @@ export function registerFurnaceTools(factory: ToolFactory, getBot: () => minefla
       takeOutput?: boolean;
       timeoutMs?: number;
     }) => {
+      ({ x, y, z } = coerceCoordinates(x, y, z));
+
       const bot = getBot();
 
       const furnacePos = new Vec3(x, y, z);

@@ -2,6 +2,7 @@ import { z } from "zod";
 import mineflayer from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { ToolFactory } from '../tool-factory.js';
+import { coerceCoordinates } from './coordinate-utils.js';
 
 function createCancellableFlightOperation(
   bot: mineflayer.Bot,
@@ -36,11 +37,13 @@ export function registerFlightTools(factory: ToolFactory, getBot: () => mineflay
     "fly-to",
     "Make the bot fly to a specific position",
     {
-      x: z.number().describe("X coordinate"),
-      y: z.number().describe("Y coordinate"),
-      z: z.number().describe("Z coordinate")
+      x: z.coerce.number().describe("X coordinate"),
+      y: z.coerce.number().describe("Y coordinate"),
+      z: z.coerce.number().describe("Z coordinate")
     },
     async ({ x, y, z }) => {
+      ({ x, y, z } = coerceCoordinates(x, y, z));
+
       const bot = getBot();
 
       if (!bot.creative) {

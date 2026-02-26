@@ -4,6 +4,7 @@ import pathfinderPkg from 'mineflayer-pathfinder';
 const { goals } = pathfinderPkg;
 import { Vec3 } from 'vec3';
 import { ToolFactory } from '../tool-factory.js';
+import { coerceCoordinates } from './coordinate-utils.js';
 
 type Direction = 'forward' | 'back' | 'left' | 'right';
 
@@ -28,13 +29,15 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
     "move-to-position",
     "Move the bot to a specific position",
     {
-      x: z.number().describe("X coordinate"),
-      y: z.number().describe("Y coordinate"),
-      z: z.number().describe("Z coordinate"),
-      range: z.number().optional().describe("How close to get to the target (default: 1)"),
+      x: z.coerce.number().describe("X coordinate"),
+      y: z.coerce.number().describe("Y coordinate"),
+      z: z.coerce.number().describe("Z coordinate"),
+      range: z.coerce.number().finite().optional().describe("How close to get to the target (default: 1)"),
       timeoutMs: z.number().int().min(50).optional().describe("Timeout in milliseconds before cancelling (min: 50, default: no timeout)")
     },
     async ({ x, y, z, range = 1, timeoutMs }: { x: number; y: number; z: number; range?: number; timeoutMs?: number }) => {
+      ({ x, y, z } = coerceCoordinates(x, y, z));
+
       const bot = getBot();
       const goal = new goals.GoalNear(x, y, z, range);
       let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -80,11 +83,13 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
     "look-at",
     "Make the bot look at a specific position",
     {
-      x: z.number().describe("X coordinate"),
-      y: z.number().describe("Y coordinate"),
-      z: z.number().describe("Z coordinate"),
+      x: z.coerce.number().describe("X coordinate"),
+      y: z.coerce.number().describe("Y coordinate"),
+      z: z.coerce.number().describe("Z coordinate"),
     },
     async ({ x, y, z }) => {
+      ({ x, y, z } = coerceCoordinates(x, y, z));
+
       const bot = getBot();
       await bot.lookAt(new Vec3(x, y, z), true);
       return factory.createResponse(`Looking at position (${x}, ${y}, ${z})`);
