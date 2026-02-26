@@ -6,24 +6,13 @@ import { Vec3 } from 'vec3';
 import minecraftData from 'minecraft-data';
 import { ToolFactory } from '../tool-factory.js';
 import { log } from '../logger.js';
+import { coerceCoordinates } from './coordinate-utils.js';
 
 type FaceDirection = 'up' | 'down' | 'north' | 'south' | 'east' | 'west';
 
 interface FaceOption {
   direction: string;
   vector: Vec3;
-}
-
-function coerceCoordinates(x: number, y: number, z: number): { x: number; y: number; z: number } {
-  const coercedX = Number(x);
-  const coercedY = Number(y);
-  const coercedZ = Number(z);
-
-  if (!Number.isFinite(coercedX) || !Number.isFinite(coercedY) || !Number.isFinite(coercedZ)) {
-    throw new Error("x, y, and z must be valid numbers");
-  }
-
-  return { x: coercedX, y: coercedY, z: coercedZ };
 }
 
 export function registerBlockTools(factory: ToolFactory, getBot: () => mineflayer.Bot): void {
@@ -146,7 +135,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
     "Find the nearest block of a specific type",
     {
       blockType: z.string().describe("Type of block to find"),
-      maxDistance: z.coerce.number().optional().describe("Maximum search distance (default: 16)")
+      maxDistance: z.coerce.number().finite().optional().describe("Maximum search distance (default: 16)")
     },
     async ({ blockType, maxDistance = 16 }) => {
       const bot = getBot();

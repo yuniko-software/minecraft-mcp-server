@@ -3,20 +3,9 @@ import mineflayer from 'mineflayer';
 import type { Item } from 'prismarine-item';
 import { Vec3 } from 'vec3';
 import { ToolFactory } from '../tool-factory.js';
+import { coerceCoordinates } from './coordinate-utils.js';
 
 const FURNACE_BLOCKS = new Set(['furnace', 'blast_furnace', 'smoker']);
-
-function coerceCoordinates(x: number, y: number, z: number): { x: number; y: number; z: number } {
-  const coercedX = Number(x);
-  const coercedY = Number(y);
-  const coercedZ = Number(z);
-
-  if (!Number.isFinite(coercedX) || !Number.isFinite(coercedY) || !Number.isFinite(coercedZ)) {
-    throw new Error("x, y, and z must be valid numbers");
-  }
-
-  return { x: coercedX, y: coercedY, z: coercedZ };
-}
 
 export function registerFurnaceTools(factory: ToolFactory, getBot: () => mineflayer.Bot): void {
   factory.registerTool(
