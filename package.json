@@ -1,6 +1,6 @@
 {
   "name": "minecraft-mcp-server",
-  "version": "1.0.0",
+  "version": "2.0.4",
   "type": "module",
   "main": "dist/main.js",
   "bin": {
