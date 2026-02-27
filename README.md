@@ -82,6 +82,87 @@ Using Claude Sonnet could give you some interesting results. The bot-agent would
 
 Example usage: [shared Claude chat](https://claude.ai/share/535d5f69-f102-4cdb-9801-f74ea5709c0b)
 
+## Configuration
+
+The server supports both inline CLI arguments and environment variables:
+
+- `--host` or `MINECRAFT_HOST` (default: `localhost`)
+- `--port` or `MINECRAFT_PORT` (default: `25565`)
+- `--username` or `MINECRAFT_USERNAME` (default: `LLMBot`)
+- `--keep-alive-without-client` or `MCP_KEEP_ALIVE_WITHOUT_CLIENT` (default: `false`)
+- `--transport` or `MCP_TRANSPORT` (`stdio` or `http`, default: `stdio`)
+- `--mcp-http-host` or `MCP_HTTP_HOST` (default: `0.0.0.0`)
+- `--mcp-http-port` or `MCP_HTTP_PORT` (default: `3001`)
+- `--mcp-http-path` or `MCP_HTTP_PATH` (default: `/mcp`)
+
+Inline CLI arguments take precedence over environment variables. This keeps Claude Desktop `args` configuration fully compatible while allowing easier container deployments.
+
+### Container Build and Runtime Variables
+
+Build-time:
+
+- No Minecraft-specific environment variables are required to build the image.
+- For the GitHub Release workflow, no extra secrets are required beyond the default `GITHUB_TOKEN` (used for GHCR publish).
+
+Runtime (optional):
+
+- `MINECRAFT_HOST` (default: `localhost`)
+- `MINECRAFT_PORT` (default: `25565`)
+- `MINECRAFT_USERNAME` (default: `LLMBot`)
+- `MCP_KEEP_ALIVE_WITHOUT_CLIENT` (default: `false`)
+- `MCP_TRANSPORT` (default: `stdio`)
+- `MCP_HTTP_HOST` (default: `0.0.0.0`)
+- `MCP_HTTP_PORT` (default: `3001`)
+- `MCP_HTTP_PATH` (default: `/mcp`)
+
+Example container run with env vars:
+
+```bash
+docker run --rm -i \
+  -e MINECRAFT_HOST=host.docker.internal \
+  -e MINECRAFT_PORT=25565 \
+  -e MINECRAFT_USERNAME=LLMBot \
+  -e MCP_KEEP_ALIVE_WITHOUT_CLIENT=true \
+  ghcr.io/yuniko-software/minecraft-mcp-server:latest
+```
+
+You can still pass inline args instead (and they will override env vars):
+
+```bash
+docker run --rm -i ghcr.io/yuniko-software/minecraft-mcp-server:latest \
+  --host host.docker.internal --port 25565 --username ClaudeBot
+```
+
+Run as remote MCP server over HTTP:
+
+```bash
+docker run -d --name minecraft-mcp-remote \
+  -p 3001:3001 \
+  -e MCP_TRANSPORT=http \
+  -e MCP_HTTP_HOST=0.0.0.0 \
+  -e MCP_HTTP_PORT=3001 \
+  -e MCP_HTTP_PATH=/mcp \
+  -e MINECRAFT_HOST=host.docker.internal \
+  -e MINECRAFT_PORT=25565 \
+  -e MINECRAFT_USERNAME=ClaudeBot \
+  ghcr.io/yuniko-software/minecraft-mcp-server:latest
+```
+
+Example MCP client configuration for remote mode:
+
+```json
+{
+  "mcp": {
+    "minecraft_remote": {
+      "type": "remote",
+      "url": "http://127.0.0.1:3001/mcp",
+      "enabled": true,
+      "timeout": 15000
+    }
+  }
+}
+```
+
 ## Available Commands
 
 Once connected to a Minecraft server, Claude can use these commands:

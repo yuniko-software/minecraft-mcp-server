@@ -1,0 +1,10 @@
+.git
+.github
+node_modules
+dist
+npm-debug.log*
+.env
+.env.*
+coverage
+tests
+.DS_Store
