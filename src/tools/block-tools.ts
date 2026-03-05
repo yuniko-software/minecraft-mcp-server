@@ -32,6 +32,11 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
       const placePos = new Vec3(x, y, z);
       const blockAtPos = bot.blockAt(placePos);
 
+      const botPos = bot.entity.position.floored();
+      if (botPos.equals(placePos) || botPos.equals(placePos.offset(0, 1, 0))) {
+        return factory.createResponse(`You can't place a block where you're standing or one block above`);
+      }
+
       if (blockAtPos && blockAtPos.name !== 'air') {
         return factory.createResponse(`There's already a block (${blockAtPos.name}) at (${x}, ${y}, ${z})`);
       }
@@ -158,6 +163,42 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
       }
 
       return factory.createResponse(`Found ${blockType} at position (${block.position.x}, ${block.position.y}, ${block.position.z})`);
+    }
+  );
+
+  factory.registerTool(
+    "find-blocks",
+    "Find all blocks within a specific distance or get all blocks if type isn't specified",
+    {
+      blockType: z.string().optional().describe("Type of block to find (optional - returns all blocks if not specified)"),
+      maxDistance: z.coerce.number().finite().optional().describe("Maximum search distance (default: 64)"),
+      count: z.coerce.number().int().positive().optional().describe("Maximum number of blocks to return (default: 512)")
+    },
+    async ({ blockType, maxDistance = 64, count = 512 }) => {
+      const bot = getBot();
+      const mcData = minecraftData(bot.version);
+      const blocksByName = mcData.blocksByName;
+
+      const matching = blockType ? (block: any) => blocksByName[blockType]?.id === block.type : () => true;
+
+      const blocks = bot.findBlocks({
+        point: bot.entity.position,
+        matching: matching,
+        maxDistance: maxDistance,
+        count: count
+      });
+
+      if (blocks.length === 0) {
+        return factory.createResponse(`No blocks found within ${maxDistance} blocks`);
+      }
+
+      const blocksList = blocks
+        .map((block, i) => `${i + 1}. ${block.x}, ${block.y}, ${block.z} - ${Math.round(block.distanceTo(bot.entity.position) * 100) / 100} blocks away`)
+        .join('\n');
+
+      return factory.createResponse(
+        `Found ${blocks.length} block(s) within ${maxDistance} blocks:\n${blocksList}`
+      );
     }
   );
 }
