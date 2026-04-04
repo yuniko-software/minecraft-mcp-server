@@ -185,7 +185,7 @@ test('place-block blocks placing at bot position and one block above', async (t)
   const mockBot = {
     entity: { position: new Vec3(10.4, 64, 20.7) },
     blockAt: sinon.stub().returns({ name: 'air' })
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
@@ -199,6 +199,32 @@ test('place-block blocks placing at bot position and one block above', async (t)
 
   t.true(resultAtFeet.content[0].text.includes("can't place a block"));
   t.true(resultAtHead.content[0].text.includes("can't place a block"));
+});
+
+test('place-block floors input coordinates before self-placement guard', async (t) => {
+  const mockServer = {
+    tool: sinon.stub()
+  } as unknown as McpServer;
+  const mockConnection = {
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+  } as unknown as BotConnection;
+  const factory = new ToolFactory(mockServer, mockConnection);
+
+  const mockBot = {
+    entity: { position: new Vec3(10.4, 64, 20.7) },
+    blockAt: sinon.stub().returns({ name: 'air' })
+  } as unknown as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
+
+  registerBlockTools(factory, getBot);
+
+  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const placeBlockCall = toolCalls.find(call => call.args[0] === 'place-block');
+  const executor = placeBlockCall!.args[3];
+
+  const result = await executor({ x: 10.4, y: 64, z: 20.7 });
+
+  t.true(result.content[0].text.includes("can't place a block"));
 });
 
 test('find-blocks returns not found when block not found', async (t) => {
@@ -240,7 +266,7 @@ test('find-blocks returns multiple results when count is greater than one', asyn
     version: '1.21',
     entity: { position: new Vec3(0, 64, 0) },
     findBlocks: sinon.stub().returns([new Vec3(1, 64, 0), new Vec3(2, 64, 0)])
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerBlockTools(factory, getBot);
@@ -254,4 +280,33 @@ test('find-blocks returns multiple results when count is greater than one', asyn
   t.true(result.content[0].text.includes('Found 2 stone block(s)'));
   t.true(result.content[0].text.includes('(1, 64, 0)'));
   t.true(result.content[0].text.includes('(2, 64, 0)'));
+});
+
+test('find-blocks clamps oversized count before calling bot.findBlocks', async (t) => {
+  const mockServer = {
+    tool: sinon.stub()
+  } as unknown as McpServer;
+  const mockConnection = {
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+  } as unknown as BotConnection;
+  const factory = new ToolFactory(mockServer, mockConnection);
+
+  const findBlocksStub = sinon.stub().returns([new Vec3(1, 64, 0)]);
+  const mockBot = {
+    version: '1.21',
+    entity: { position: new Vec3(0, 64, 0) },
+    findBlocks: findBlocksStub
+  } as unknown as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
+
+  registerBlockTools(factory, getBot);
+
+  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const findBlockCall = toolCalls.find(call => call.args[0] === 'find-blocks');
+  const executor = findBlockCall!.args[3];
+
+  await executor({ blockType: 'stone', maxDistance: 16, count: 10_000 });
+
+  const findBlocksArgs = findBlocksStub.firstCall.args[0];
+  t.is(findBlocksArgs.count, 256);
 });

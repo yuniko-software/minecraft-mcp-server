@@ -9,6 +9,7 @@ import { log } from '../logger.js';
 import { coerceCoordinates } from './coordinate-utils.js';
 
 type FaceDirection = 'up' | 'down' | 'north' | 'south' | 'east' | 'west';
+const MAX_FIND_BLOCKS_COUNT = 256;
 
 interface FaceOption {
   direction: string;
@@ -29,7 +30,8 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
       ({ x, y, z } = coerceCoordinates(x, y, z));
 
       const bot = getBot();
-      const placePos = new Vec3(x, y, z);
+      const placePos = new Vec3(x, y, z).floored();
+      ({ x, y, z } = placePos);
       const blockAtPos = bot.blockAt(placePos);
 
       const botPos = bot.entity.position.floored();
@@ -141,12 +143,13 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
     {
       blockType: z.string().describe("Type of block to find"),
       maxDistance: z.coerce.number().finite().optional().describe("Maximum search distance (default: 16)"),
-      count: z.coerce.number().int().positive().optional().describe("Maximum number of blocks to return (default: 1)")
+      count: z.coerce.number().int().positive().optional().describe("Maximum number of blocks to return (default: 1, max: 256)")
     },
     async ({ blockType, maxDistance = 16, count = 1 }) => {
       const bot = getBot();
       const mcData = minecraftData(bot.version);
       const blocksByName = mcData.blocksByName;
+      const normalizedCount = Math.min(count, MAX_FIND_BLOCKS_COUNT);
 
       if (!blocksByName[blockType]) {
         return factory.createResponse(`Unknown block type: ${blockType}`);
@@ -154,7 +157,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
 
       const blockId = blocksByName[blockType].id;
 
-      if (count === 1) {
+      if (normalizedCount === 1) {
         const block = bot.findBlock({
           matching: blockId,
           maxDistance: maxDistance
@@ -171,7 +174,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
         point: bot.entity.position,
         matching: blockId,
         maxDistance: maxDistance,
-        count: count
+        count: normalizedCount
       });
 
       if (blocks.length === 0) {
