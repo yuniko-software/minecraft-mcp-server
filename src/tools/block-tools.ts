@@ -32,12 +32,13 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
       const bot = getBot();
       const placePos = new Vec3(x, y, z).floored();
       ({ x, y, z } = placePos);
-      const blockAtPos = bot.blockAt(placePos);
 
       const botPos = bot.entity.position.floored();
       if (placePos.equals(botPos) || placePos.equals(botPos.offset(0, 1, 0))) {
         return factory.createResponse(`You can't place a block where you're standing or one block above`);
       }
+
+      const blockAtPos = bot.blockAt(placePos);
 
       if (blockAtPos && blockAtPos.name !== 'air') {
         return factory.createResponse(`There's already a block (${blockAtPos.name}) at (${x}, ${y}, ${z})`);
