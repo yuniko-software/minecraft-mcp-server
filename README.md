@@ -105,7 +105,7 @@ Once connected to a Minecraft server, Claude can use these commands:
 - `place-block` - Place a block at specified coordinates
 - `dig-block` - Dig a block at specified coordinates
 - `get-block-info` - Get information about a block
-- `find-block` - Find the nearest block of a specific type
+- `find-blocks` - Find one or more nearby blocks of a specific type
 
 ### Furnace
 - `smelt-item` - Smelt items using a furnace-like block

@@ -67,7 +67,7 @@ test('registerBlockTools registers get-block-info tool', (t) => {
   t.is(getBlockInfoCall!.args[1], 'Get information about a block at the specified position');
 });
 
-test('registerBlockTools registers find-block tool', (t) => {
+test('registerBlockTools registers find-blocks tool', (t) => {
   const mockServer = {
     tool: sinon.stub()
   } as unknown as McpServer;
@@ -81,10 +81,10 @@ test('registerBlockTools registers find-block tool', (t) => {
   registerBlockTools(factory, getBot);
 
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const findBlockCall = toolCalls.find(call => call.args[0] === 'find-block');
+  const findBlockCall = toolCalls.find(call => call.args[0] === 'find-blocks');
 
   t.truthy(findBlockCall);
-  t.is(findBlockCall!.args[1], 'Find the nearest block of a specific type');
+  t.is(findBlockCall!.args[1], 'Find one or more nearby blocks of a specific type');
 });
 
 test('get-block-info returns block information', async (t) => {
@@ -173,7 +173,35 @@ test('dig-block handles air blocks', async (t) => {
   t.true(result.content[0].text.includes('No block found'));
 });
 
-test('find-block returns not found when block not found', async (t) => {
+test('place-block blocks placing at bot position and one block above', async (t) => {
+  const mockServer = {
+    tool: sinon.stub()
+  } as unknown as McpServer;
+  const mockConnection = {
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+  } as unknown as BotConnection;
+  const factory = new ToolFactory(mockServer, mockConnection);
+
+  const mockBot = {
+    entity: { position: new Vec3(10.4, 64, 20.7) },
+    blockAt: sinon.stub().returns({ name: 'air' })
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
+
+  registerBlockTools(factory, getBot);
+
+  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const placeBlockCall = toolCalls.find(call => call.args[0] === 'place-block');
+  const executor = placeBlockCall!.args[3];
+
+  const resultAtFeet = await executor({ x: 10, y: 64, z: 20 });
+  const resultAtHead = await executor({ x: 10, y: 65, z: 20 });
+
+  t.true(resultAtFeet.content[0].text.includes("can't place a block"));
+  t.true(resultAtHead.content[0].text.includes("can't place a block"));
+});
+
+test('find-blocks returns not found when block not found', async (t) => {
   const mockServer = {
     tool: sinon.stub()
   } as unknown as McpServer;
@@ -191,10 +219,39 @@ test('find-block returns not found when block not found', async (t) => {
   registerBlockTools(factory, getBot);
 
   const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
-  const findBlockCall = toolCalls.find(call => call.args[0] === 'find-block');
+  const findBlockCall = toolCalls.find(call => call.args[0] === 'find-blocks');
   const executor = findBlockCall!.args[3];
 
   const result = await executor({ blockType: 'diamond_ore', maxDistance: 16 });
 
   t.true(result.content[0].text.includes('No diamond_ore found'));
+});
+
+test('find-blocks returns multiple results when count is greater than one', async (t) => {
+  const mockServer = {
+    tool: sinon.stub()
+  } as unknown as McpServer;
+  const mockConnection = {
+    checkConnectionAndReconnect: sinon.stub().resolves({ connected: true })
+  } as unknown as BotConnection;
+  const factory = new ToolFactory(mockServer, mockConnection);
+
+  const mockBot = {
+    version: '1.21',
+    entity: { position: new Vec3(0, 64, 0) },
+    findBlocks: sinon.stub().returns([new Vec3(1, 64, 0), new Vec3(2, 64, 0)])
+  } as Partial<mineflayer.Bot>;
+  const getBot = () => mockBot as mineflayer.Bot;
+
+  registerBlockTools(factory, getBot);
+
+  const toolCalls = (mockServer.tool as sinon.SinonStub).getCalls();
+  const findBlockCall = toolCalls.find(call => call.args[0] === 'find-blocks');
+  const executor = findBlockCall!.args[3];
+
+  const result = await executor({ blockType: 'stone', maxDistance: 16, count: 2 });
+
+  t.true(result.content[0].text.includes('Found 2 stone block(s)'));
+  t.true(result.content[0].text.includes('(1, 64, 0)'));
+  t.true(result.content[0].text.includes('(2, 64, 0)'));
 });

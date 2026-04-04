@@ -33,7 +33,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
       const blockAtPos = bot.blockAt(placePos);
 
       const botPos = bot.entity.position.floored();
-      if (botPos.equals(placePos) || botPos.equals(placePos.offset(0, 1, 0))) {
+      if (placePos.equals(botPos) || placePos.equals(botPos.offset(0, 1, 0))) {
         return factory.createResponse(`You can't place a block where you're standing or one block above`);
       }
 
@@ -136,13 +136,14 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
   );
 
   factory.registerTool(
-    "find-block",
-    "Find the nearest block of a specific type",
+    "find-blocks",
+    "Find one or more nearby blocks of a specific type",
     {
       blockType: z.string().describe("Type of block to find"),
-      maxDistance: z.coerce.number().finite().optional().describe("Maximum search distance (default: 16)")
+      maxDistance: z.coerce.number().finite().optional().describe("Maximum search distance (default: 16)"),
+      count: z.coerce.number().int().positive().optional().describe("Maximum number of blocks to return (default: 1)")
     },
-    async ({ blockType, maxDistance = 16 }) => {
+    async ({ blockType, maxDistance = 16, count = 1 }) => {
       const bot = getBot();
       const mcData = minecraftData(bot.version);
       const blocksByName = mcData.blocksByName;
@@ -153,52 +154,35 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
 
       const blockId = blocksByName[blockType].id;
 
-      const block = bot.findBlock({
-        matching: blockId,
-        maxDistance: maxDistance
-      });
+      if (count === 1) {
+        const block = bot.findBlock({
+          matching: blockId,
+          maxDistance: maxDistance
+        });
 
-      if (!block) {
-        return factory.createResponse(`No ${blockType} found within ${maxDistance} blocks`);
+        if (!block) {
+          return factory.createResponse(`No ${blockType} found within ${maxDistance} blocks`);
+        }
+
+        return factory.createResponse(`Found ${blockType} at position (${block.position.x}, ${block.position.y}, ${block.position.z})`);
       }
-
-      return factory.createResponse(`Found ${blockType} at position (${block.position.x}, ${block.position.y}, ${block.position.z})`);
-    }
-  );
-
-  factory.registerTool(
-    "find-blocks",
-    "Find all blocks within a specific distance or get all blocks if type isn't specified",
-    {
-      blockType: z.string().optional().describe("Type of block to find (optional - returns all blocks if not specified)"),
-      maxDistance: z.coerce.number().finite().optional().describe("Maximum search distance (default: 64)"),
-      count: z.coerce.number().int().positive().optional().describe("Maximum number of blocks to return (default: 512)")
-    },
-    async ({ blockType, maxDistance = 64, count = 512 }) => {
-      const bot = getBot();
-      const mcData = minecraftData(bot.version);
-      const blocksByName = mcData.blocksByName;
-
-      const matching = blockType ? (block: any) => blocksByName[blockType]?.id === block.type : () => true;
 
       const blocks = bot.findBlocks({
         point: bot.entity.position,
-        matching: matching,
+        matching: blockId,
         maxDistance: maxDistance,
         count: count
       });
 
       if (blocks.length === 0) {
-        return factory.createResponse(`No blocks found within ${maxDistance} blocks`);
+        return factory.createResponse(`No ${blockType} found within ${maxDistance} blocks`);
       }
 
       const blocksList = blocks
-        .map((block, i) => `${i + 1}. ${block.x}, ${block.y}, ${block.z} - ${Math.round(block.distanceTo(bot.entity.position) * 100) / 100} blocks away`)
+        .map((block, i) => `${i + 1}. (${block.x}, ${block.y}, ${block.z})`)
         .join('\n');
 
-      return factory.createResponse(
-        `Found ${blocks.length} block(s) within ${maxDistance} blocks:\n${blocksList}`
-      );
+      return factory.createResponse(`Found ${blocks.length} ${blockType} block(s) within ${maxDistance} blocks:\n${blocksList}`);
     }
   );
 }
