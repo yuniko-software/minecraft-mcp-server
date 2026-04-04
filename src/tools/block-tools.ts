@@ -144,7 +144,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
     {
       blockType: z.string().describe("Type of block to find"),
       maxDistance: z.coerce.number().finite().optional().describe("Maximum search distance (default: 16)"),
-      count: z.coerce.number().int().positive().optional().describe("Maximum number of blocks to return (default: 1, max: 256)")
+      count: z.coerce.number().int().positive().optional().describe("Maximum number of blocks to return (default: 1; values above 256 are clamped)")
     },
     async ({ blockType, maxDistance = 16, count = 1 }) => {
       const bot = getBot();
