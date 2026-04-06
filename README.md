@@ -100,6 +100,8 @@ Once connected to a Minecraft server, Claude can use these commands:
 - `list-inventory` - List all items in the bot's inventory
 - `find-item` - Find a specific item in inventory
 - `equip-item` - Equip a specific item
+- `open-container` - Open a block container or chest at specified coordinates
+- `close-window` - Close the window or inventory that the bot currently has open
 
 ### Block Interaction
 - `place-block` - Place a block at specified coordinates
