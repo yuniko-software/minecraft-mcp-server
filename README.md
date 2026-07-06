@@ -9,6 +9,9 @@
 <a href="https://github.com/yuniko-software/minecraft-mcp-server/releases/latest">
   <img alt="Latest Release" src="https://img.shields.io/github/v/release/yuniko-software/minecraft-mcp-server?label=Latest%20Release">
 </a>
+<a href="https://www.remoteopenclaw.com/mcp/yuniko-software/minecraft-mcp-server">
+  <img alt="Remote OpenClaw" src="https://img.shields.io/badge/Remote%20OpenClaw-Listed-c96442">
+</a>
 
 <img width="2063" height="757" alt="image" src="https://github.com/user-attachments/assets/3f0f0438-f079-4226-90bd-87b9e1311d19" />
 
