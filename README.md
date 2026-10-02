@@ -15,7 +15,7 @@
 ___
 
 > [!IMPORTANT]
-> Currently supports Minecraft version 1.21.11. Newer versions may not work with this MCP server, but we will add support as soon as possible.
+> Minecraft Java 26.1.2 has been verified with Mineflayer 4.39.0 or later. Newer versions may not work with this MCP server, but we will add support as soon as possible.
 
 https://github.com/user-attachments/assets/6f17f329-3991-4bc7-badd-7cde9aacb92f
 
@@ -28,8 +28,8 @@ A Minecraft bot powered by large language models and [Mineflayer API](https://gi
 ## Prerequisites
 
 - Git
-- Node.js (>= 20.10.0)
-- A running Minecraft game (the setup below was tested with Minecraft 1.21.8 Java Edition included in Microsoft Game Pass)
+- Node.js (>= 22)
+- A running Minecraft game (the setup below was tested with Minecraft 26.1.2 Java Edition)
 - An MCP-compatible client. Claude Desktop will be used as an example, but other MCP clients are also supported
 
 ## Getting started
@@ -131,3 +131,15 @@ To get started with contributing, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 ⭐ If you find this project useful, please consider giving it a star on GitHub! ⭐
 
 Your support helps make this project more visible to other people who might benefit from it.
+
+## Live compatibility check
+
+After building the project, open a singleplayer world to LAN and run:
+
+```sh
+npm run test:live -- LAN_PORT
+```
+
+Replace `LAN_PORT` with the port shown in Minecraft chat. The test connects a bot on localhost, lists MCP tools, checks its position and game mode, and reads a nearby block. It disconnects when finished and does not intentionally change blocks. The port defaults to `25565` when omitted.
+
+Minecraft Java 26.1.2 (protocol 775) was also manually verified with a Survival bot: place a dirt block, read it back, dig it, and restore the borrowed dirt to its original location.

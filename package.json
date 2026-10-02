@@ -21,12 +21,13 @@
     "start": "node dist/main.js",
     "test": "ava",
     "lint": "eslint \"{src,tests}/**/*.ts\"",
-    "lint:fix": "eslint \"{src,tests}/**/*.ts\" --fix"
+    "lint:fix": "eslint \"{src,tests}/**/*.ts\" --fix",
+    "test:live": "node scripts/test-live.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
-    "minecraft-data": "^3.105.0",
-    "mineflayer": "^4.35.0",
+    "minecraft-data": "^3.117.0",
+    "mineflayer": "^4.39.0",
     "mineflayer-pathfinder": "^2.4.2",
     "vec3": "^0.1.8",
     "yargs": "^18.0.0",
@@ -50,6 +51,6 @@
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=20.10.0"
+    "node": ">=22"
   }
 }
