@@ -87,13 +87,14 @@ test('move-to-position returns error when pathfinding fails', async (t) => {
 
   const mockBot = {
     pathfinder: {
+      movements: {},
       goto: sinon.stub().rejects(new Error('Cannot find path')),
       stop: sinon.stub()
     },
     entity: {
       position: new Vec3(10, 20, 30)
     }
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerPositionTools(factory, getBot);
@@ -108,7 +109,7 @@ test('move-to-position returns error when pathfinding fails', async (t) => {
   t.true(result.content[0].text.includes('Cannot find path'));
 });
 
-test.serial('move-to-position returns timeout error and stops pathfinder', async (t) => {
+test.serial('move-to-position returns timeout error and clears the goal immediately', async (t) => {
   const clock = sinon.useFakeTimers();
   t.teardown(() => clock.restore());
 
@@ -122,10 +123,12 @@ test.serial('move-to-position returns timeout error and stops pathfinder', async
 
   const mockBot = {
     pathfinder: {
+      movements: {},
       goto: sinon.stub().returns(new Promise(() => {})),
-      stop: sinon.stub()
+      stop: sinon.stub(),
+      setGoal: sinon.stub()
     }
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerPositionTools(factory, getBot);
@@ -140,7 +143,8 @@ test.serial('move-to-position returns timeout error and stops pathfinder', async
 
   t.true(result.isError);
   t.true(result.content[0].text.includes('Move timed out after 1000ms'));
-  t.true((mockBot.pathfinder!.stop as sinon.SinonStub).calledOnce);
+  t.false((mockBot.pathfinder!.stop as sinon.SinonStub).called);
+  t.true((mockBot.pathfinder!.setGoal as sinon.SinonStub).calledOnceWithExactly(null));
 });
 
 test('move-to-position succeeds without timeout and does not stop pathfinder', async (t) => {
@@ -154,10 +158,11 @@ test('move-to-position succeeds without timeout and does not stop pathfinder', a
 
   const mockBot = {
     pathfinder: {
+      movements: {},
       goto: sinon.stub().resolves(),
       stop: sinon.stub()
     }
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerPositionTools(factory, getBot);
@@ -187,10 +192,11 @@ test.serial('move-to-position succeeds before timeout and does not stop pathfind
 
   const mockBot = {
     pathfinder: {
+      movements: {},
       goto: sinon.stub().resolves(),
       stop: sinon.stub()
     }
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerPositionTools(factory, getBot);
@@ -218,10 +224,11 @@ test('move-to-position preserves pathfinder error when not timing out', async (t
 
   const mockBot = {
     pathfinder: {
+      movements: {},
       goto: sinon.stub().rejects(new Error('Path was stopped before it could be completed! Thus, the desired goal was not reached.')),
       stop: sinon.stub()
     }
-  } as Partial<mineflayer.Bot>;
+  } as unknown as Partial<mineflayer.Bot>;
   const getBot = () => mockBot as mineflayer.Bot;
 
   registerPositionTools(factory, getBot);

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import mineflayer from 'mineflayer';
 import { ToolFactory } from '../tool-factory.js';
+import { requireAwake } from './interaction-utils.js';
 
 interface InventoryItem {
   name: string;
@@ -9,6 +10,52 @@ interface InventoryItem {
 }
 
 export function registerInventoryTools(factory: ToolFactory, getBot: () => mineflayer.Bot): void {
+  let dropping = false;
+  factory.registerTool(
+    "drop-item",
+    "Drop an exact inventory item name with a quantity up to its full stack size; does not move the bot",
+    {
+      itemName: z.string().trim().min(1).describe("Exact item name, for example cobblestone"),
+      count: z.number().int().positive().describe("Quantity to drop, up to this item's stack size (usually 64, 16 or 1)")
+    },
+    async ({ itemName, count }: { itemName: string; count: number }) => {
+      const bot = getBot();
+      const cursorCount = () => bot.inventory.selectedItem?.count ?? 0;
+      requireAwake(bot);
+      if (dropping) throw new Error('Another drop operation is in progress');
+      if (bot.currentWindow || bot.inventory.selectedItem) throw new Error('Close the inventory window and clear its cursor before dropping');
+      if (bot.usingHeldItem) throw new Error('Finish using the held item before dropping');
+      const name = itemName.toLowerCase();
+      const items = bot.inventory.items().filter(item => item.name === name &&
+        item.slot >= bot.inventory.inventoryStart && item.slot < bot.inventory.inventoryEnd);
+      if (!items.length) throw new Error(`No ${name} in inventory`);
+      const item = items.find(item => item.count === count) ?? items[0];
+      if (count > item.stackSize) throw new Error(`${name} has a maximum stack size of ${item.stackSize}; requested ${count}`);
+      const matchingCount = () => bot.inventory.items()
+        .filter(candidate => candidate.name === name && candidate.type === item.type &&
+          candidate.metadata === item.metadata && candidate.slot >= bot.inventory.inventoryStart &&
+          candidate.slot < bot.inventory.inventoryEnd)
+        .reduce((total, candidate) => total + candidate.count, 0);
+      const before = matchingCount();
+      if (before < count) throw new Error(`Only ${before} ${name} available; requested ${count}`);
+      dropping = true;
+      try {
+        // Toss an entire selected stack directly so clearing a slot needs one call.
+        if (item.count === count) await bot.tossStack(item);
+        else await bot.toss(item.type, item.metadata ?? null, count);
+        const removed = before - matchingCount();
+        if (removed !== count || bot.inventory.selectedItem) {
+          throw new Error(`Drop not fully confirmed: requested ${count}, inventory decreased by ${removed}`);
+        }
+        return factory.createResponse(`Dropped ${removed} ${name}; ${matchingCount()} remaining in inventory. Ground items may be picked up again.`);
+      } catch (error) {
+        throw new Error(`${String(error)}; requested ${count} ${name}, inventory decreased by ${before - matchingCount()}, remaining ${matchingCount()}, cursor holds ${cursorCount()}. Partial changes are not rolled back; inspect inventory before retrying.`);
+      } finally {
+        dropping = false;
+      }
+    }
+  );
+
   factory.registerTool(
     "list-inventory",
     "List all items in the bot's inventory",

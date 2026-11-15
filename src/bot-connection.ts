@@ -1,7 +1,7 @@
 import mineflayer from 'mineflayer';
 import pathfinderPkg from 'mineflayer-pathfinder';
-const { pathfinder, Movements } = pathfinderPkg;
-import minecraftData from 'minecraft-data';
+const { pathfinder } = pathfinderPkg;
+import { initializeSafeNavigation } from './safe-navigation.js';
 
 const SUPPORTED_MINECRAFT_VERSION = '1.21.11';
 
@@ -69,9 +69,7 @@ export class BotConnection {
       this.state = 'connected';
       this.callbacks.onLog('info', 'Bot spawned in world');
 
-      const mcData = minecraftData(bot.version);
-      const defaultMove = new Movements(bot, mcData);
-      bot.pathfinder.setMovements(defaultMove);
+      initializeSafeNavigation(bot);
 
       bot.chat('LLM-powered bot ready to receive instructions!');
       this.callbacks.onLog('info', `Bot connected successfully. Username: ${this.config.username}, Server: ${this.config.host}:${this.config.port}`);
