@@ -7,6 +7,8 @@ import minecraftData from 'minecraft-data';
 import { ToolFactory } from '../tool-factory.js';
 import { log } from '../logger.js';
 import { coerceCoordinates } from './coordinate-utils.js';
+import { safeGoto } from '../safe-navigation.js';
+import type { Item } from 'prismarine-item';
 
 type FaceDirection = 'up' | 'down' | 'north' | 'south' | 'east' | 'west';
 const MAX_FIND_BLOCKS_COUNT = 256;
@@ -67,7 +69,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
         if (referenceBlock && referenceBlock.name !== 'air') {
           if (!bot.canSeeBlock(referenceBlock)) {
             const goal = new goals.GoalNear(referencePos.x, referencePos.y, referencePos.z, 2);
-            await bot.pathfinder.goto(goal);
+            await safeGoto(bot, goal);
           }
 
           await bot.lookAt(placePos, true);
@@ -99,17 +101,42 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
 
       const bot = getBot();
       const blockPos = new Vec3(x, y, z);
-      const block = bot.blockAt(blockPos);
+      let block = bot.blockAt(blockPos);
 
       if (!block || block.name === 'air') {
-        return factory.createResponse(`No block found at position (${x}, ${y}, ${z})`);
+        throw new Error(`No block found at position (${x}, ${y}, ${z})`);
       }
 
       if (!bot.canDigBlock(block) || !bot.canSeeBlock(block)) {
         const goal = new goals.GoalNear(x, y, z, 2);
-        await bot.pathfinder.goto(goal);
+        await safeGoto(bot, goal);
       }
 
+      const currentBlock = bot.blockAt(blockPos);
+      if (!currentBlock || currentBlock.stateId !== block.stateId || currentBlock.type !== block.type) {
+        throw new Error('Target block changed during approach; inspect before digging');
+      }
+      block = currentBlock;
+      if (!bot.canDigBlock(block) || !bot.canSeeBlock(block)) throw new Error('Target block is still unreachable for digging');
+      const creative = bot.game.gameMode === 'creative';
+      let tool: Item | null = null;
+      let fastest = block.canHarvest(null) || creative ? block.digTime(null, creative, false, false) : Infinity;
+      for (const item of bot.inventory.items()) {
+        if (!creative && !block.canHarvest(item.type)) continue;
+        const time = block.digTime(item.type, creative, false, false, item.enchants, bot.entity.effects);
+        if (time < fastest) {
+          fastest = time;
+          tool = item;
+        }
+      }
+      if (!Number.isFinite(fastest)) throw new Error(`No suitable harvesting tool available for ${block.name}`);
+      if (tool) await bot.equip(tool, 'hand');
+      else if (bot.heldItem && (!block.canHarvest(bot.heldItem.type) ||
+        block.digTime(bot.heldItem.type, creative, false, false) > fastest)) {
+        // Native unequip can toss the held stack when inventory is full.
+        if (bot.inventory.firstEmptyInventorySlot() === null) throw new Error('Inventory is full; cannot safely empty the hand for digging');
+        await bot.unequip('hand');
+      }
       await bot.dig(block);
       return factory.createResponse(`Dug ${block.name} at (${x}, ${y}, ${z})`);
     }

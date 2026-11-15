@@ -93,6 +93,15 @@ Once connected to a Minecraft server, Claude can use these commands:
 - `jump` - Make the bot jump
 - `move-in-direction` - Move in a specific direction for a duration
 
+Pathfinding is non-destructive: navigation and implicit dig/place approaches do
+not break blocks, build towers or place scaffolding. Unreachable routes return
+MCP errors instead of breaking through walls. Open doors or provide an accessible
+route explicitly. Intentional `dig-block` and `place-block` remain available.
+Before an explicit dig, the bot selects the fastest available eligible harvesting
+tool after approaching (for example, iron axe before stone axe for logs); stone is
+a fallback when iron is absent. Valid hand mining remains supported, and missing
+required harvesting tools or native equip/dig failures return errors.
+
 ### Flight
 - `fly-to` - Make the bot fly directly to specific coordinates
 
@@ -100,18 +109,49 @@ Once connected to a Minecraft server, Claude can use these commands:
 - `list-inventory` - List all items in the bot's inventory
 - `find-item` - Find a specific item in inventory
 - `equip-item` - Equip a specific item
+- `drop-item` - Drop exact `itemName` and positive integer `count` in one call, up to the item's full stack size (64 for ordinary materials, 16 or 1 for other items)
+
+For example, `drop-item` with `itemName: "cobblestone", count: 64` drops a full
+stack in one call. Availability is checked before dropping; missing items,
+insufficient quantities, native failures and unconfirmed/partial transfers return
+MCP errors with inventory changes. A full matching stack is selected when available
+to clear its slot directly; otherwise the quantity can come from matching inventory
+stacks. Smaller drops use Mineflayer's native toss API and may involve multiple
+inventory clicks, but still require only one tool call. The bot does not turn or
+move automatically. Ground items may be picked up again; inventory changes do not
+guarantee that another player received the items.
+
+### Survival
+- `eat` - Consume one inventory food item using its exact `itemName` (for example, `bread`); equips it in the main hand and leaves it equipped
+- `sleep` - Enter the nearby bed at explicit `x`, `y`, `z` coordinates in the overworld; returns upon entering, not after the night
+- `wake` - Wake from bed, waiting up to 3 seconds for confirmation
+- `status` - JSON health, food (out of 20), saturation and oxygen (`null` when unavailable), sleeping, position, gamemode, dimension, held item, vehicle and other current state
+
+Eating, sleeping and boarding retain Mineflayer/server restrictions (including hunger,
+time, bed occupancy, monsters and available vehicle seats). Failures return MCP errors.
+These tools do not automatically move, alter game rules or select a different target.
 
 ### Block Interaction
 - `place-block` - Place a block at specified coordinates
 - `dig-block` - Dig a block at specified coordinates
 - `get-block-info` - Get information about a block
 - `find-blocks` - Find one or more nearby blocks of a specific type
+- `interact-block` - Right-click the visible block at `x`, `y`, `z` within normal reach; use `sleep` for beds
 
 ### Furnace
 - `smelt-item` - Smelt items using a furnace-like block
 
 ### Entity Interaction
-- `find-entity` - Find the nearest entity of a specific type
+- `find-entity` - Find the nearest entity of a specific type, including its entity ID
+- `interact-entity` - Right-click a nearby unobstructed entity using its `entityId`
+- `mount` - Try boarding an entity by `entityId` (for example, a boat), waiting up to 3 seconds for confirmation
+- `dismount` - Leave the current vehicle, waiting up to 3 seconds for confirmation
+
+Interactions use the currently equipped main-hand item, which may feed a mob, place
+an item, open a container or activate a block. They report a **sent request**, not a
+guaranteed server-side result; inspect the world or `status` afterward. Local checks
+use vanilla reach (4.5 blocks for blocks, 3 for entities; 5 in creative) and do not
+override server rules. Mounting may still be rejected by the server; timeout is an error.
 
 ### Communication
 - `send-chat` - Send a chat message in-game

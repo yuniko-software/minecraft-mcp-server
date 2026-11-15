@@ -28,7 +28,7 @@ export function registerEntityTools(factory: ToolFactory, getBot: () => Bot): vo
       }
 
       const entityName = entity.name || (entity as { username?: string }).username || entity.type;
-      return factory.createResponse(`Found ${entityName} at position (${Math.floor(entity.position.x)}, ${Math.floor(entity.position.y)}, ${Math.floor(entity.position.z)})`);
+      return factory.createResponse(`Found ${entityName} at position (${Math.floor(entity.position.x)}, ${Math.floor(entity.position.y)}, ${Math.floor(entity.position.z)}) (entity ID: ${entity.id})`);
     }
   );
 }

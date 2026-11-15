@@ -5,6 +5,7 @@ const { goals } = pathfinderPkg;
 import { Vec3 } from 'vec3';
 import { ToolFactory } from '../tool-factory.js';
 import { coerceCoordinates } from './coordinate-utils.js';
+import { safeGoto } from '../safe-navigation.js';
 
 type Direction = 'forward' | 'back' | 'left' | 'right';
 
@@ -53,7 +54,7 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
         });
       }
 
-      const gotoPromise = bot.pathfinder.goto(goal);
+      const gotoPromise = safeGoto(bot, goal);
 
       try {
         if (timeoutPromise) {
