@@ -9,6 +9,8 @@ import { createRequire } from 'node:module';
 import type { Block } from 'prismarine-block';
 import pathfinderPkg from 'mineflayer-pathfinder';
 import type { Move } from 'mineflayer-pathfinder';
+import { DigApproachGoal, hasReachableDigFace } from '../src/digging-geometry.js';
+import type { world } from 'prismarine-world';
 import { initializeSafeNavigation } from '../src/safe-navigation.js';
 import { ToolFactory } from '../src/tool-factory.js';
 import { registerBlockTools } from '../src/tools/block-tools.js';
@@ -16,7 +18,7 @@ import { registerPositionTools } from '../src/tools/position-tools.js';
 
 function setup() {
   const block = {
-    name: 'oak_log', type: 1, stateId: 1, position: new Vec3(4, 64, 0),
+    name: 'oak_log', type: 1, stateId: 1, position: new Vec3(4, 64, 0), diggable: true,
     canHarvest: sinon.stub().returns(true),
     digTime: sinon.stub().callsFake(type => type === 3 ? 200 : type === 2 ? 500 : 1000)
   };
@@ -25,7 +27,8 @@ function setup() {
   const bot = {
     registry: minecraftData('1.21.11'),
     game: { gameMode: 'survival' }, heldItem: { name: 'dirt' },
-    entity: { position: new Vec3(0, 64, 0), effects: [], width: 0.6 },
+    entity: { position: new Vec3(0, 64, 0), effects: [], width: 0.6, height: 1.8 },
+    world: { raycast: sinon.stub().returns(block) },
     inventory: { items: sinon.stub().returns([stone, iron]) },
     blockAt: sinon.stub().returns(block),
     canDigBlock: sinon.stub().returns(true), canSeeBlock: sinon.stub().returns(true),
@@ -238,4 +241,91 @@ test('range 0.5 on integer coordinates selects only the target block-grid node',
   t.true(goal.isEnd(node));
   t.false(goal.isEnd({ ...node, z: -195 }));
   t.false(goal.isEnd({ ...node, x: 325, z: -198 }));
+});
+
+test('dig uses an exposed face without undoing a usable position when the center ray is occluded', async t => {
+  const { bot, block, call } = setup();
+  bot.entity.position = new Vec3(315.5, 70, -206.5);
+  block.position = new Vec3(316, 69, -208);
+  bot.canSeeBlock.returns(false);
+  const result = await call('dig-block', { x: 316, y: 69, z: -208 });
+  t.falsy(result.isError);
+  t.false(bot.pathfinder.goto.called);
+  t.true(bot.dig.calledOnceWithExactly(block, true, 'raycast'));
+});
+
+test('dig approach goal rejects a nearby occluded node and accepts a reachable visible canopy face', t => {
+  const { bot, block } = setup();
+  block.position = new Vec3(316, 69, -208);
+  const node: Move = {
+    x: 315, y: 70, z: -207, remainingBlocks: 0, cost: 0, toBreak: [], toPlace: [], parkour: false, hash: ''
+  };
+  const near = new pathfinderPkg.goals.GoalNear(316, 69, -208, 2);
+  t.true(near.isEnd(node), 'Old radius-only approach stops even when obstructed');
+  const goal = new DigApproachGoal(bot as unknown as Bot, block.position);
+  bot.world.raycast.returns({ position: new Vec3(315, 70, -207) });
+  t.false(goal.isEnd(node));
+  bot.world.raycast.returns(block);
+  t.true(goal.isEnd(node));
+  t.false(goal.isEnd({ ...node, y: 62 }), 'Distant lower position is still out of reach');
+});
+
+test('dig rejects every obstructed face after approach without cutting supporting leaves', async t => {
+  const { bot, call } = setup();
+  bot.world.raycast.returns({ position: new Vec3(315, 69, -207) });
+  const result = await call('dig-block');
+  t.true(result.isError);
+  t.regex(result.content[0].text, /no reachable visible face/);
+  t.true(bot.pathfinder.goto.calledOnce);
+  t.false(bot.dig.called);
+  t.false(bot.equip.called);
+});
+
+test('dig-face checks retain vanilla reach and native dig failures propagate', async t => {
+  const { bot, block, call } = setup();
+  bot.entity.position = new Vec3(-10, 64, 0);
+  t.false(hasReachableDigFace(bot as unknown as Bot, block as unknown as Block));
+  bot.entity.position = new Vec3(0, 64, 0);
+  bot.dig.rejects(new Error('Block not in view'));
+  const result = await call('dig-block');
+  t.true(result.isError);
+  t.regex(result.content[0].text, /Block not in view/);
+});
+
+test('actual canopy raycasts reject observed occlusion and distinguish synthetic center-only occlusion', t => {
+  const data = minecraftData('1.21.11');
+  const loadBlock = createRequire(import.meta.url)('prismarine-block') as (version: string) => typeof Block;
+  const BlockClass = loadBlock('1.21.11');
+  const loadWorld = createRequire(import.meta.url)('prismarine-world') as (version: string) => new () => world.World;
+  const World = loadWorld('1.21.11');
+  const world = new World().sync;
+  const blocks = new Map<string, Block>();
+  const put = (name: string, x: number, y: number, z: number) => {
+    const block = BlockClass.fromStateId(data.blocksByName[name].minStateId, 0);
+    block.position = new Vec3(x, y, z);
+    blocks.set(block.position.toString(), block);
+    return block;
+  };
+  const target = put('oak_log', 316, 69, -208);
+  put('oak_leaves', 315, 69, -207);
+  put('oak_leaves', 315, 70, -208);
+  put('oak_leaves', 316, 70, -207);
+  world.getBlock = position => {
+    const existing = blocks.get(position.toString());
+    if (existing) return existing;
+    const air = BlockClass.fromStateId(data.blocksByName.air.minStateId, 0);
+    air.position = position;
+    return air;
+  };
+  const { bot } = setup();
+  bot.entity.position = new Vec3(315.47298800572617, 70, -206.5);
+  bot.world.raycast.callsFake((from, direction, range) => world.raycast(from, direction, range));
+  t.false(hasReachableDigFace(bot as unknown as Bot, target), 'Observed full-cube leaves obstruct the current exposed-face rays');
+  // Synthetic counterexample only, not a proposed change to the live canopy.
+  blocks.delete(new Vec3(315, 70, -208).toString());
+  put('oak_leaves', 316, 70, -208);
+  const eye = bot.entity.position.offset(0, 1.62, 0);
+  const centerRay = target.position.offset(0.5, 0.5, 0.5).minus(eye).normalize();
+  t.false(world.raycast(eye, centerRay, 4.5)?.position.equals(target.position));
+  t.true(hasReachableDigFace(bot as unknown as Bot, target), 'An exposed west face can be valid even with the center ray still blocked');
 });

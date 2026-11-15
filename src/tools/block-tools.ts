@@ -9,6 +9,7 @@ import { log } from '../logger.js';
 import { coerceCoordinates } from './coordinate-utils.js';
 import { safeGoto } from '../safe-navigation.js';
 import type { Item } from 'prismarine-item';
+import { DigApproachGoal, hasReachableDigFace } from '../digging-geometry.js';
 
 type FaceDirection = 'up' | 'down' | 'north' | 'south' | 'east' | 'west';
 const MAX_FIND_BLOCKS_COUNT = 256;
@@ -100,15 +101,15 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
       ({ x, y, z } = coerceCoordinates(x, y, z));
 
       const bot = getBot();
-      const blockPos = new Vec3(x, y, z);
+      const blockPos = new Vec3(x, y, z).floored();
       let block = bot.blockAt(blockPos);
 
       if (!block || block.name === 'air') {
         throw new Error(`No block found at position (${x}, ${y}, ${z})`);
       }
 
-      if (!bot.canDigBlock(block) || !bot.canSeeBlock(block)) {
-        const goal = new goals.GoalNear(x, y, z, 2);
+      if (!bot.canDigBlock(block) || !hasReachableDigFace(bot, block)) {
+        const goal = new DigApproachGoal(bot, blockPos);
         await safeGoto(bot, goal);
       }
 
@@ -117,7 +118,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
         throw new Error('Target block changed during approach; inspect before digging');
       }
       block = currentBlock;
-      if (!bot.canDigBlock(block) || !bot.canSeeBlock(block)) throw new Error('Target block is still unreachable for digging');
+      if (!bot.canDigBlock(block) || !hasReachableDigFace(bot, block)) throw new Error('Target block has no reachable visible face for digging');
       const creative = bot.game.gameMode === 'creative';
       let tool: Item | null = null;
       let fastest = block.canHarvest(null) || creative ? block.digTime(null, creative, false, false) : Infinity;
@@ -137,7 +138,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
         if (bot.inventory.firstEmptyInventorySlot() === null) throw new Error('Inventory is full; cannot safely empty the hand for digging');
         await bot.unequip('hand');
       }
-      await bot.dig(block);
+      await bot.dig(block, true, 'raycast');
       return factory.createResponse(`Dug ${block.name} at (${x}, ${y}, ${z})`);
     }
   );

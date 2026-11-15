@@ -106,6 +106,11 @@ their collision shapes clear the centered player body; navigation never opens or
 closes them automatically. Timeout cancellation clears the path immediately.
 `move-to-position` uses floored block coordinates and a block-grid goal radius,
 not an exact body-position tolerance; a radius below 1 selects the target block.
+Digging approaches seek a safely reachable, visible block face rather than just
+standing within a radius of the block. A usable current position is retained;
+native raycast digging can use an exposed face even if the center ray is blocked.
+Range, collision and harvesting-tool checks still apply; supporting foliage is
+never cleared automatically.
 
 ### Flight
 - `fly-to` - Make the bot fly directly to specific coordinates
