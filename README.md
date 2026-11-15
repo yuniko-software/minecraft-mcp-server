@@ -101,6 +101,11 @@ Before an explicit dig, the bot selects the fastest available eligible harvestin
 tool after approaching (for example, iron axe before stone axe for logs); stone is
 a fallback when iron is absent. Valid hand mining remains supported, and missing
 required harvesting tools or native equip/dig failures return errors.
+Already-open doors are traversable only when both halves are loaded/open and
+their collision shapes clear the centered player body; navigation never opens or
+closes them automatically. Timeout cancellation clears the path immediately.
+`move-to-position` uses floored block coordinates and a block-grid goal radius,
+not an exact body-position tolerance; a radius below 1 selects the target block.
 
 ### Flight
 - `fly-to` - Make the bot fly directly to specific coordinates
@@ -134,7 +139,7 @@ These tools do not automatically move, alter game rules or select a different ta
 ### Block Interaction
 - `place-block` - Place a block at specified coordinates
 - `dig-block` - Dig a block at specified coordinates
-- `get-block-info` - Get information about a block
+- `get-block-info` - Get a block's name/type, state ID, properties and collision shapes for read-only inspection
 - `find-blocks` - Find one or more nearby blocks of a specific type
 - `interact-block` - Right-click the visible block at `x`, `y`, `z` within normal reach; use `sleep` for beds
 

@@ -99,7 +99,11 @@ test('get-block-info returns block information', async (t) => {
   const mockBlock = {
     name: 'stone',
     type: 1,
-    position: new Vec3(10, 64, 20)
+    position: new Vec3(10, 64, 20),
+    stateId: 1,
+    getProperties: () => ({}),
+    boundingBox: 'block',
+    shapes: [[0, 0, 0, 1, 1, 1]]
   };
   const mockBot = {
     blockAt: sinon.stub().returns(mockBlock)
@@ -118,6 +122,9 @@ test('get-block-info returns block information', async (t) => {
   t.true(result.content[0].text.includes('10'));
   t.true(result.content[0].text.includes('64'));
   t.true(result.content[0].text.includes('20'));
+  t.deepEqual(JSON.parse(result.content[0].text.split('\n')[1]), {
+    stateId: 1, properties: {}, boundingBox: 'block', shapes: [[0, 0, 0, 1, 1, 1]]
+  });
 });
 
 test('get-block-info handles missing block', async (t) => {

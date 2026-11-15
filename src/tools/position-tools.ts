@@ -33,7 +33,7 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
       x: z.coerce.number().describe("X coordinate"),
       y: z.coerce.number().describe("Y coordinate"),
       z: z.coerce.number().describe("Z coordinate"),
-      range: z.coerce.number().finite().optional().describe("How close to get to the target (default: 1)"),
+      range: z.coerce.number().finite().optional().describe("Block-grid goal radius (default: 1); coordinates are floored, not exact body positions"),
       timeoutMs: z.number().int().min(50).optional().describe("Timeout in milliseconds before cancelling (min: 50, default: no timeout)")
     },
     async ({ x, y, z, range = 1, timeoutMs }: { x: number; y: number; z: number; range?: number; timeoutMs?: number }) => {
@@ -73,8 +73,10 @@ export function registerPositionTools(factory: ToolFactory, getBot: () => minefl
           clearTimeout(timeoutId);
         }
         if (timedOut) {
-          bot.pathfinder.stop();
           gotoPromise.catch(() => {});
+          // stop() is deferred until a waypoint; clearing the goal resets the
+          // active path and controls immediately, including while stuck.
+          bot.pathfinder.setGoal(null);
         }
       }
     }

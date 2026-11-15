@@ -161,7 +161,12 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
         return factory.createResponse(`No block information found at position (${x}, ${y}, ${z})`);
       }
 
-      return factory.createResponse(`Found ${block.name} (type: ${block.type}) at position (${block.position.x}, ${block.position.y}, ${block.position.z})`);
+      return factory.createResponse(`Found ${block.name} (type: ${block.type}) at position (${block.position.x}, ${block.position.y}, ${block.position.z})\n${JSON.stringify({
+        stateId: block.stateId,
+        properties: block.getProperties(),
+        boundingBox: block.boundingBox,
+        shapes: block.shapes
+      })}`);
     }
   );
 

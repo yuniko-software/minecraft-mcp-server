@@ -5,6 +5,10 @@ import type { Bot } from 'mineflayer';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BotConnection } from '../src/bot-connection.js';
 import { Vec3 } from 'vec3';
+import { createRequire } from 'node:module';
+import type { Block } from 'prismarine-block';
+import pathfinderPkg from 'mineflayer-pathfinder';
+import type { Move } from 'mineflayer-pathfinder';
 import { initializeSafeNavigation } from '../src/safe-navigation.js';
 import { ToolFactory } from '../src/tool-factory.js';
 import { registerBlockTools } from '../src/tools/block-tools.js';
@@ -21,7 +25,7 @@ function setup() {
   const bot = {
     registry: minecraftData('1.21.11'),
     game: { gameMode: 'survival' }, heldItem: { name: 'dirt' },
-    entity: { position: new Vec3(0, 64, 0), effects: [] },
+    entity: { position: new Vec3(0, 64, 0), effects: [], width: 0.6 },
     inventory: { items: sinon.stub().returns([stone, iron]) },
     blockAt: sinon.stub().returns(block),
     canDigBlock: sinon.stub().returns(true), canSeeBlock: sinon.stub().returns(true),
@@ -148,4 +152,90 @@ test('placement fails on unreachable approach without placing or digging', async
   t.true((await call('place-block')).isError);
   t.false(bot.placeBlock.called);
   t.false(bot.dig.called);
+});
+
+test('actual 1.21.11 open-door shapes permit forward waypoints while closed doors stay blocked', t => {
+  const data = minecraftData('1.21.11');
+  const loadBlock = createRequire(import.meta.url)('prismarine-block') as (version: string) => typeof Block;
+  const BlockClass = loadBlock('1.21.11');
+  const definition = data.blocksByName.oak_door;
+  for (const open of [false, true]) {
+    for (const facing of ['north', 'south', 'east', 'west']) {
+      for (const hinge of ['left', 'right']) {
+        const door = (half: string, y: number) => {
+          for (let id = definition.minStateId; id <= definition.maxStateId; id++) {
+            const block = BlockClass.fromStateId(id, 0);
+            const properties = block.getProperties();
+            if (properties.open === open && properties.facing === facing && properties.hinge === hinge &&
+              properties.half === half && properties.powered === false) {
+              block.position = new Vec3(319, y, -196);
+              return block;
+            }
+          }
+          throw new Error('Missing test door state');
+        };
+        const lower = door('lower', 64);
+        const upper = door('upper', 65);
+        const { bot } = setup();
+        bot.blockAt.callsFake(position => {
+          if (position.equals(lower.position)) return lower;
+          if (position.equals(upper.position)) return upper;
+          const block = BlockClass.fromStateId(data.blocksByName[position.y === 63 ? 'stone' : 'air'].minStateId, 0);
+          block.position = position;
+          return block;
+        });
+        const direction = facing === 'north' || facing === 'south' ? { x: 0, z: 1 } : { x: 1, z: 0 };
+        const node: Move = {
+          x: 319 - direction.x, y: 64, z: -196 - direction.z,
+          remainingBlocks: 0, cost: 0, toBreak: [], toPlace: [], parkour: false, hash: ''
+        };
+        const baseline = new pathfinderPkg.Movements(bot as unknown as Bot);
+        baseline.canDig = false;
+        const upstreamNeighbors: Move[] = [];
+        baseline.getMoveForward(node, direction, upstreamNeighbors);
+        t.is(upstreamNeighbors.length, 0, 'Upstream coarse classifier blocks even an open oak door');
+        initializeSafeNavigation(bot as unknown as Bot);
+        const safe = bot.pathfinder.setMovements.lastCall.args[0];
+        const neighbors: Move[] = [];
+        safe.getMoveForward(node, direction, neighbors);
+        t.is(neighbors.length, open ? 1 : 0, `${facing}/${hinge}, open=${open}`);
+        for (const next of neighbors) {
+          t.deepEqual(next.toBreak, []);
+          t.deepEqual(next.toPlace, []);
+          const exterior: Move[] = [];
+          safe.getMoveForward(next, direction, exterior);
+          t.is(exterior.length, 1);
+          const shape = lower.shapes[0];
+          const panelDirection = shape[3] - shape[0] < 0.5
+            ? { x: shape[0] === 0 ? -1 : 1, z: 0 }
+            : { x: 0, z: shape[2] === 0 ? -1 : 1 };
+          const blockedPanel: Move[] = [];
+          safe.getMoveForward(next, panelDirection, blockedPanel);
+          t.is(blockedPanel.length, 0, 'Exiting through the open door panel is still blocked');
+        }
+        if (open) {
+          bot.entity.width = 1;
+          const tooWide: Move[] = [];
+          safe.getMoveForward(node, direction, tooWide);
+          t.is(tooWide.length, 0, 'Player body must fit between collision panels');
+          bot.entity.width = 0.6;
+          bot.blockAt.withArgs(upper.position).returns(null);
+          const unloaded: Move[] = [];
+          safe.getMoveForward(node, direction, unloaded);
+          t.is(unloaded.length, 0, 'Unloaded upper half is not traversable');
+          bot.blockAt.resetBehavior();
+        }
+      }
+    }
+  }
+});
+
+test('range 0.5 on integer coordinates selects only the target block-grid node', t => {
+  const goal = new pathfinderPkg.goals.GoalNear(319, 64, -194, 0.5);
+  const node: Move = {
+    x: 319, y: 64, z: -194, remainingBlocks: 0, cost: 0, toBreak: [], toPlace: [], parkour: false, hash: ''
+  };
+  t.true(goal.isEnd(node));
+  t.false(goal.isEnd({ ...node, z: -195 }));
+  t.false(goal.isEnd({ ...node, x: 325, z: -198 }));
 });
