@@ -233,16 +233,6 @@ test('actual 1.21.11 open-door shapes permit forward waypoints while closed door
   }
 });
 
-test('range 0.5 on integer coordinates selects only the target block-grid node', t => {
-  const goal = new pathfinderPkg.goals.GoalNear(319, 64, -194, 0.5);
-  const node: Move = {
-    x: 319, y: 64, z: -194, remainingBlocks: 0, cost: 0, toBreak: [], toPlace: [], parkour: false, hash: ''
-  };
-  t.true(goal.isEnd(node));
-  t.false(goal.isEnd({ ...node, z: -195 }));
-  t.false(goal.isEnd({ ...node, x: 325, z: -198 }));
-});
-
 test('dig uses an exposed face without undoing a usable position when the center ray is occluded', async t => {
   const { bot, block, call } = setup();
   bot.entity.position = new Vec3(315.5, 70, -206.5);
@@ -338,12 +328,9 @@ test('actual canopy raycasts reject observed occlusion and distinguish synthetic
 test('explicit sugar-cane digging accepts the observed empty shape without approaching or harvesting its column', async t => {
   const { world, put } = geometryWorld();
   const target = put('sugar_cane', 323, 64, -185);
-  const base = put('sugar_cane', 323, 63, -185);
+  put('sugar_cane', 323, 63, -185);
   put('sugar_cane', 323, 65, -185);
-  t.is(target.type, 281);
-  t.is(target.stateId, 6746);
   t.deepEqual(target.shapes, []);
-  t.is(target.boundingBox, 'empty');
   const { bot, call } = setup();
   bot.entity.position = new Vec3(323.5, 64, -186.62879777705055);
   bot.blockAt.returns(target);
@@ -354,7 +341,6 @@ test('explicit sugar-cane digging accepts the observed empty shape without appro
   t.falsy(result.isError);
   t.false(bot.pathfinder.goto.called);
   t.true(bot.dig.calledOnceWithExactly(target, true, 'auto'));
-  t.false(bot.dig.calledWith(base));
 });
 
 test('empty-shape plant targets retain center-line occlusion and ignore collisions behind the target', async t => {

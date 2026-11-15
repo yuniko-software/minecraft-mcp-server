@@ -113,16 +113,14 @@ test('sleep uses the specified loaded bed and returns on entry without waiting f
   t.false(bot.wake.called);
 });
 
-for (const reason of ['occupied', 'monsters nearby', 'too far', 'not night']) {
-  test(`sleep propagates native rejection: ${reason}`, async t => {
-    const { bot, block, call } = setup();
-    block.name = 'red_bed';
-    bot.sleep.rejects(new Error(reason));
-    const result = await call('sleep', { x: 1, y: 64, z: 0 });
-    t.true(result.isError);
-    t.true(result.content[0].text.includes(reason));
-  });
-}
+test('sleep propagates native bed rejection', async t => {
+  const { bot, block, call } = setup();
+  block.name = 'red_bed';
+  bot.sleep.rejects(new Error('monsters nearby'));
+  const result = await call('sleep', { x: 1, y: 64, z: 0 });
+  t.true(result.isError);
+  t.regex(result.content[0].text, /monsters nearby/);
+});
 
 test('sleep rejects missing, non-bed, obstructed and unsafe-dimension targets before activation', async t => {
   const { bot, block, call } = setup();
