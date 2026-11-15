@@ -109,6 +109,8 @@ not an exact body-position tolerance; a radius below 1 selects the target block.
 Digging approaches seek a safely reachable, visible block face rather than just
 standing within a radius of the block. A usable current position is retained;
 native raycast digging can use an exposed face even if the center ray is blocked.
+Non-colliding diggable plants (such as sugar cane) instead require an unobstructed
+center sightline within normal reach and use native center-targeted digging.
 Range, collision and harvesting-tool checks still apply; supporting foliage is
 never cleared automatically.
 

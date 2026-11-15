@@ -138,7 +138,7 @@ export function registerBlockTools(factory: ToolFactory, getBot: () => mineflaye
         if (bot.inventory.firstEmptyInventorySlot() === null) throw new Error('Inventory is full; cannot safely empty the hand for digging');
         await bot.unequip('hand');
       }
-      await bot.dig(block, true, 'raycast');
+      await bot.dig(block, true, block.shapes?.length === 0 ? 'auto' : 'raycast');
       return factory.createResponse(`Dug ${block.name} at (${x}, ${y}, ${z})`);
     }
   );

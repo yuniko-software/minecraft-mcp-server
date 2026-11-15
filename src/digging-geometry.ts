@@ -13,6 +13,16 @@ export function hasReachableDigFace(bot: Bot, block: Block, feet = bot.entity.po
   const eye = feet.offset(0, eyeHeight(bot.entity), 0);
   const center = block.position.offset(0.5, 0.5, 0.5);
   const reach = bot.game.gameMode === 'creative' ? 5 : 4.5;
+  if (block.shapes?.length === 0) {
+    // Plants have no collision hit. Validate the center sightline before using
+    // native center-targeted digging, rather than requiring a shape intersection.
+    const ray = center.minus(eye);
+    const distance = ray.norm();
+    if (distance > reach) return false;
+    if (distance === 0) return true;
+    const hit = bot.world.raycast(eye, ray.normalize(), distance);
+    return !hit || hit.position.equals(block.position);
+  }
   const delta = eye.minus(center);
   const side = (distance: number) => Math.abs(distance) > 0.5 ? Math.sign(distance) : 0;
   const faces = [

@@ -292,7 +292,7 @@ test('dig-face checks retain vanilla reach and native dig failures propagate', a
   t.regex(result.content[0].text, /Block not in view/);
 });
 
-test('actual canopy raycasts reject observed occlusion and distinguish synthetic center-only occlusion', t => {
+function geometryWorld() {
   const data = minecraftData('1.21.11');
   const loadBlock = createRequire(import.meta.url)('prismarine-block') as (version: string) => typeof Block;
   const BlockClass = loadBlock('1.21.11');
@@ -306,10 +306,6 @@ test('actual canopy raycasts reject observed occlusion and distinguish synthetic
     blocks.set(block.position.toString(), block);
     return block;
   };
-  const target = put('oak_log', 316, 69, -208);
-  put('oak_leaves', 315, 69, -207);
-  put('oak_leaves', 315, 70, -208);
-  put('oak_leaves', 316, 70, -207);
   world.getBlock = position => {
     const existing = blocks.get(position.toString());
     if (existing) return existing;
@@ -317,6 +313,15 @@ test('actual canopy raycasts reject observed occlusion and distinguish synthetic
     air.position = position;
     return air;
   };
+  return { world, put, blocks };
+}
+
+test('actual canopy raycasts reject observed occlusion and distinguish synthetic center-only occlusion', t => {
+  const { world, put, blocks } = geometryWorld();
+  const target = put('oak_log', 316, 69, -208);
+  put('oak_leaves', 315, 69, -207);
+  put('oak_leaves', 315, 70, -208);
+  put('oak_leaves', 316, 70, -207);
   const { bot } = setup();
   bot.entity.position = new Vec3(315.47298800572617, 70, -206.5);
   bot.world.raycast.callsFake((from, direction, range) => world.raycast(from, direction, range));
@@ -328,4 +333,83 @@ test('actual canopy raycasts reject observed occlusion and distinguish synthetic
   const centerRay = target.position.offset(0.5, 0.5, 0.5).minus(eye).normalize();
   t.false(world.raycast(eye, centerRay, 4.5)?.position.equals(target.position));
   t.true(hasReachableDigFace(bot as unknown as Bot, target), 'An exposed west face can be valid even with the center ray still blocked');
+});
+
+test('explicit sugar-cane digging accepts the observed empty shape without approaching or harvesting its column', async t => {
+  const { world, put } = geometryWorld();
+  const target = put('sugar_cane', 323, 64, -185);
+  const base = put('sugar_cane', 323, 63, -185);
+  put('sugar_cane', 323, 65, -185);
+  t.is(target.type, 281);
+  t.is(target.stateId, 6746);
+  t.deepEqual(target.shapes, []);
+  t.is(target.boundingBox, 'empty');
+  const { bot, call } = setup();
+  bot.entity.position = new Vec3(323.5, 64, -186.62879777705055);
+  bot.blockAt.returns(target);
+  bot.world.raycast.callsFake((from, direction, range) => world.raycast(from, direction, range));
+  bot.canSeeBlock.returns(false);
+  t.true(hasReachableDigFace(bot as unknown as Bot, target));
+  const result = await call('dig-block', { x: 323, y: 64, z: -185 });
+  t.falsy(result.isError);
+  t.false(bot.pathfinder.goto.called);
+  t.true(bot.dig.calledOnceWithExactly(target, true, 'auto'));
+  t.false(bot.dig.calledWith(base));
+});
+
+test('empty-shape plant targets retain center-line occlusion and ignore collisions behind the target', async t => {
+  for (const name of ['sugar_cane', 'short_grass']) {
+    const { world, put, blocks } = geometryWorld();
+    const target = put(name, 323, 64, -185);
+    t.deepEqual(target.shapes, []);
+    const { bot, call } = setup();
+    bot.entity.position = new Vec3(323.5, 64, -187.5);
+    bot.blockAt.returns(target);
+    bot.world.raycast.callsFake((from, direction, range) => world.raycast(from, direction, range));
+    put('stone', 323, 64, -184);
+    put('stone', 323, 65, -184);
+    t.true(hasReachableDigFace(bot as unknown as Bot, target), 'Block beyond the plant is not an occluder');
+    put('stone', 323, 64, -186);
+    put('stone', 323, 65, -186);
+    t.false(hasReachableDigFace(bot as unknown as Bot, target), 'Opaque block before the plant prevents targeting');
+    const result = await call('dig-block', { x: 323, y: 64, z: -185 });
+    t.true(result.isError);
+    t.false(bot.dig.called);
+    t.false(bot.equip.called);
+    t.true(bot.pathfinder.goto.calledOnce);
+    const movements = bot.pathfinder.movements;
+    t.false(movements.canDig);
+    t.false(movements.allow1by1towers);
+    t.deepEqual(movements.scafoldingBlocks, []);
+    blocks.delete(new Vec3(323, 64, -186).toString());
+    blocks.delete(new Vec3(323, 65, -186).toString());
+    t.true(hasReachableDigFace(bot as unknown as Bot, target));
+  }
+});
+
+test('empty-shape digging and approach goals enforce vanilla center reach and native eligibility', async t => {
+  const { world, put } = geometryWorld();
+  const target = put('sugar_cane', 0, 64, 0);
+  const { bot, call } = setup();
+  bot.blockAt.returns(target);
+  bot.world.raycast.callsFake((from, direction, range) => world.raycast(from, direction, range));
+  bot.entity.position = new Vec3(0.5, 62.88, -4);
+  t.true(hasReachableDigFace(bot as unknown as Bot, target), 'Survival accepts center at exactly 4.5 blocks');
+  bot.entity.position = new Vec3(0.5, 62.88, -4.01);
+  t.false(hasReachableDigFace(bot as unknown as Bot, target));
+  bot.game.gameMode = 'creative';
+  t.true(hasReachableDigFace(bot as unknown as Bot, target));
+  bot.entity.position = new Vec3(0.5, 62.88, -4.51);
+  t.false(hasReachableDigFace(bot as unknown as Bot, target), 'Creative does not exceed 5 blocks');
+  bot.game.gameMode = 'survival';
+  const goal = new DigApproachGoal(bot as unknown as Bot, target.position);
+  const node: Move = { x: 0, y: 64, z: -2, remainingBlocks: 0, cost: 0, toBreak: [], toPlace: [], parkour: false, hash: '' };
+  t.true(goal.isEnd(node));
+  t.false(goal.isEnd({ ...node, z: -6 }));
+  t.true((await call('dig-block', { x: 0, y: 64, z: 0 })).isError);
+  t.false(bot.dig.called);
+  bot.entity.position = new Vec3(0.5, 64, -1.5);
+  bot.canDigBlock.returns(false);
+  t.true((await call('dig-block', { x: 0, y: 64, z: 0 })).isError);
+  t.false(bot.dig.called);
 });
